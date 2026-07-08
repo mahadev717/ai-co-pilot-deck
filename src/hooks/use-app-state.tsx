@@ -43,7 +43,8 @@ type AppStateContextType = {
   revenue: number;
   customers: number;
   teamPRs: number;
-  login: (email: string, name: string) => void;
+  login: (email: string, password: string) => { ok: true } | { ok: false; error: string };
+  register: (email: string, name: string, password: string) => { ok: true } | { ok: false; error: string };
   logout: () => void;
   connectIntegration: (id: string) => Promise<void>;
   disconnectIntegration: (id: string) => void;
