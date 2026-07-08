@@ -503,6 +503,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         disconnectIntegration,
         toggleAgent,
         sendChatMessage,
+        clearChat: () => setChatHistory(defaultMessages),
         resolveRecommendation,
         clearNotifications,
       }}
