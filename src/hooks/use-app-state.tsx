@@ -49,6 +49,7 @@ type AppStateContextType = {
   disconnectIntegration: (id: string) => void;
   toggleAgent: (id: string) => void;
   sendChatMessage: (text: string) => void;
+  clearChat: () => void;
   resolveRecommendation: (id: string, text: string) => void;
   clearNotifications: () => void;
 };
