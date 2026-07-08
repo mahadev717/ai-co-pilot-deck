@@ -200,24 +200,57 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = (email: string, name: string) => {
+  const readUsers = (): Record<string, { name: string; password: string }> => {
+    if (typeof window === "undefined") return {};
+    try {
+      return JSON.parse(localStorage.getItem("copilot_users") || "{}");
+    } catch {
+      return {};
+    }
+  };
+
+  const finishLogin = (email: string, name: string) => {
     const newUser = { email, name: name || "Founder" };
     setIsAuthenticated(true);
     setUser(newUser);
     save("copilot_auth", "true");
     save("copilot_user", newUser);
 
-    // Add welcome notification
     const welcomeNotif: AppNotification = {
       id: Math.random().toString(),
-      title: `Logged in as ${newUser.name}`,
+      title: `Signed in as ${newUser.name}`,
       time: "Just now",
       read: false,
       type: "success",
     };
-    const updated = [welcomeNotif, ...notifications];
-    setNotifications(updated);
-    save("copilot_notifs", updated);
+    setNotifications((prev) => {
+      const updated = [welcomeNotif, ...prev];
+      save("copilot_notifs", updated);
+      return updated;
+    });
+  };
+
+  const register: AppStateContextType["register"] = (email, name, password) => {
+    const em = email.trim().toLowerCase();
+    if (!em || !name.trim() || !password) return { ok: false, error: "All fields are required." };
+    if (password.length < 6) return { ok: false, error: "Password must be at least 6 characters." };
+    const users = readUsers();
+    if (users[em]) return { ok: false, error: "An account with this email already exists." };
+    users[em] = { name: name.trim(), password };
+    save("copilot_users", users);
+    finishLogin(em, name.trim());
+    return { ok: true };
+  };
+
+  const login: AppStateContextType["login"] = (email, password) => {
+    const em = email.trim().toLowerCase();
+    if (!em || !password) return { ok: false, error: "Please enter your email and password." };
+    const users = readUsers();
+    const record = users[em];
+    if (!record) return { ok: false, error: "No account found for this email. Please sign up." };
+    if (record.password !== password) return { ok: false, error: "Incorrect password." };
+    finishLogin(em, record.name);
+    return { ok: true };
   };
 
   const logout = () => {
