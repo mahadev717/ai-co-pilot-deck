@@ -81,9 +81,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "The AI operating system that connects every startup tool into one intelligent platform.",
+          "Startup Copilot OS is the AI operating system that connects every business tool into one intelligent platform — predict problems, automate operations, and help founders decide faster.",
       },
       { name: "theme-color", content: "#0b0b1a" },
+      { property: "og:title", content: "Startup Copilot OS — Your AI Co-founder for Smarter Startups" },
+      { name: "twitter:title", content: "Startup Copilot OS — Your AI Co-founder for Smarter Startups" },
+      { property: "og:description", content: "Startup Copilot OS is the AI operating system that connects every business tool into one intelligent platform — predict problems, automate operations, and help founders decide faster." },
+      { name: "twitter:description", content: "Startup Copilot OS is the AI operating system that connects every business tool into one intelligent platform — predict problems, automate operations, and help founders decide faster." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ad5f9200-5135-4cde-9198-78db141ddb39/id-preview-df18de88--782047b9-bceb-4f17-b90d-2adaaefeff20.lovable.app-1783484859897.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ad5f9200-5135-4cde-9198-78db141ddb39/id-preview-df18de88--782047b9-bceb-4f17-b90d-2adaaefeff20.lovable.app-1783484859897.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
