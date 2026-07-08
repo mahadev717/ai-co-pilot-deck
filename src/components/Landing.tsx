@@ -1,9 +1,37 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  Sparkles, ArrowRight, Play, Bot, Zap, LineChart, LayoutDashboard, Network, Users,
-  Slack, Github, Mail, CreditCard, BarChart3, MessageSquare, FileText, Database,
-  Check, X, Menu, ChevronDown, Star, TrendingUp, Bell, Activity, DollarSign,
-  ShieldCheck, Rocket, Building2, Twitter, Linkedin, Github as GithubIcon,
+  Sparkles,
+  ArrowRight,
+  Play,
+  Bot,
+  Zap,
+  LineChart,
+  LayoutDashboard,
+  Network,
+  Users,
+  Slack,
+  Github,
+  Mail,
+  CreditCard,
+  BarChart3,
+  MessageSquare,
+  FileText,
+  Database,
+  Check,
+  X,
+  Menu,
+  ChevronDown,
+  Star,
+  TrendingUp,
+  Bell,
+  Activity,
+  DollarSign,
+  ShieldCheck,
+  Rocket,
+  Building2,
+  Twitter,
+  Linkedin,
+  Github as GithubIcon,
 } from "lucide-react";
 import { motion, useInView, useMotionValue, useSpring, useTransform } from "motion/react";
 
@@ -22,7 +50,15 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
   );
 }
 
-function Counter({ to, suffix = "", duration = 2 }: { to: number; suffix?: string; duration?: number }) {
+function Counter({
+  to,
+  suffix = "",
+  duration = 2,
+}: {
+  to: number;
+  suffix?: string;
+  duration?: number;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const mv = useMotionValue(0);
@@ -32,7 +68,12 @@ function Counter({ to, suffix = "", duration = 2 }: { to: number; suffix?: strin
     if (inView) mv.set(to);
   }, [inView, to, mv]);
   useEffect(() => spring.on("change", (v) => setVal(v)), [spring]);
-  return <span ref={ref}>{Math.round(val)}{suffix}</span>;
+  return (
+    <span ref={ref}>
+      {Math.round(val)}
+      {suffix}
+    </span>
+  );
 }
 
 /* ---------- nav ---------- */
@@ -69,15 +110,21 @@ function Nav() {
         </a>
         <nav className="hidden items-center gap-8 md:flex">
           {links.map(([label, href]) => (
-            <a key={href} href={href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <a
+              key={href}
+              href={href}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
               {label}
             </a>
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground">Sign in</a>
+          <a href="/auth" className="text-sm text-muted-foreground hover:text-foreground">
+            Sign in
+          </a>
           <a
-            href="#pricing"
+            href="/auth"
             className="inline-flex items-center gap-1.5 rounded-full gradient-brand-bg px-4 py-2 text-sm font-medium text-primary-foreground ring-glow transition-transform hover:scale-[1.03]"
           >
             Get Started <ArrowRight className="h-3.5 w-3.5" />
@@ -91,11 +138,19 @@ function Nav() {
         <div className="border-t border-border bg-background/90 backdrop-blur-xl md:hidden">
           <div className="flex flex-col gap-3 px-6 py-4">
             {links.map(([label, href]) => (
-              <a key={href} href={href} onClick={() => setOpen(false)} className="text-sm text-muted-foreground">
+              <a
+                key={href}
+                href={href}
+                onClick={() => setOpen(false)}
+                className="text-sm text-muted-foreground"
+              >
                 {label}
               </a>
             ))}
-            <a href="#pricing" className="mt-2 inline-flex items-center justify-center rounded-full gradient-brand-bg px-4 py-2 text-sm font-medium text-primary-foreground">
+            <a
+              href="/auth"
+              className="mt-2 inline-flex items-center justify-center rounded-full gradient-brand-bg px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
               Get Started
             </a>
           </div>
@@ -164,9 +219,22 @@ function DashboardMock() {
             <div className="text-xs text-muted-foreground">Business Health</div>
             <div className="relative mx-auto my-2 h-24 w-24">
               <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-                <circle cx="50" cy="50" r="42" stroke="oklch(1 0 0 / 0.1)" strokeWidth="8" fill="none" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  stroke="oklch(1 0 0 / 0.1)"
+                  strokeWidth="8"
+                  fill="none"
+                />
                 <motion.circle
-                  cx="50" cy="50" r="42" stroke="url(#g)" strokeWidth="8" fill="none" strokeLinecap="round"
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  stroke="url(#g)"
+                  strokeWidth="8"
+                  fill="none"
+                  strokeLinecap="round"
                   strokeDasharray="264"
                   initial={{ strokeDashoffset: 264 }}
                   animate={{ strokeDashoffset: 264 - 264 * 0.87 }}
@@ -211,13 +279,19 @@ function DashboardMock() {
               </defs>
               <motion.path
                 d="M0,45 L30,40 L60,42 L90,30 L120,34 L150,22 L180,26 L210,14 L240,20 L270,10 L300,6"
-                fill="none" stroke="oklch(0.75 0.2 285)" strokeWidth="2"
-                initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.4 }}
+                fill="none"
+                stroke="oklch(0.75 0.2 285)"
+                strokeWidth="2"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1.5, delay: 0.4 }}
               />
               <motion.path
                 d="M0,45 L30,40 L60,42 L90,30 L120,34 L150,22 L180,26 L210,14 L240,20 L270,10 L300,6 L300,60 L0,60 Z"
                 fill="url(#fill)"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 1.2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 1.2 }}
               />
             </svg>
           </div>
@@ -228,12 +302,25 @@ function DashboardMock() {
               <Users className="h-3.5 w-3.5" /> Team activity
             </div>
             <div className="mt-3 flex -space-x-2">
-              {["oklch(0.7 0.2 285)","oklch(0.75 0.15 200)","oklch(0.72 0.18 30)","oklch(0.7 0.2 340)"].map((c,i)=>(
-                <div key={i} className="h-7 w-7 rounded-full border-2 border-card" style={{background:c}}/>
+              {[
+                "oklch(0.7 0.2 285)",
+                "oklch(0.75 0.15 200)",
+                "oklch(0.72 0.18 30)",
+                "oklch(0.7 0.2 340)",
+              ].map((c, i) => (
+                <div
+                  key={i}
+                  className="h-7 w-7 rounded-full border-2 border-card"
+                  style={{ background: c }}
+                />
               ))}
-              <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-card bg-muted text-[10px]">+9</div>
+              <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-card bg-muted text-[10px]">
+                +9
+              </div>
             </div>
-            <div className="mt-3 text-[11px] text-muted-foreground">14 active now · 3 PRs merged</div>
+            <div className="mt-3 text-[11px] text-muted-foreground">
+              14 active now · 3 PRs merged
+            </div>
           </div>
 
           {/* Customer growth */}
@@ -243,10 +330,14 @@ function DashboardMock() {
             </div>
             <div className="mt-2 font-display text-xl font-semibold">3,204</div>
             <div className="mt-2 flex h-8 items-end gap-1">
-              {[30,45,38,60,52,72,68,85,78,92].map((h,i)=>(
-                <motion.div key={i}
-                  initial={{height:0}} animate={{height:`${h}%`}} transition={{duration:0.6, delay:0.5+i*0.05}}
-                  className="w-full rounded-sm gradient-brand-bg opacity-80"/>
+              {[30, 45, 38, 60, 52, 72, 68, 85, 78, 92].map((h, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${h}%` }}
+                  transition={{ duration: 0.6, delay: 0.5 + i * 0.05 }}
+                  className="w-full rounded-sm gradient-brand-bg opacity-80"
+                />
               ))}
             </div>
           </div>
@@ -257,7 +348,8 @@ function DashboardMock() {
               <Bot className="h-3.5 w-3.5" /> AI recommendation
             </div>
             <p className="mt-2 text-xs leading-relaxed">
-              Churn risk detected in <span className="text-foreground">3 enterprise accounts</span>. Suggested: schedule QBRs this week.
+              Churn risk detected in <span className="text-foreground">3 enterprise accounts</span>.
+              Suggested: schedule QBRs this week.
             </p>
             <button className="mt-2 text-[11px] gradient-text font-medium">Review action →</button>
           </div>
@@ -293,26 +385,36 @@ function Hero() {
           <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow" />
-              <span className="text-muted-foreground">Now in private beta · YC-backed founders using it daily</span>
+              <span className="text-muted-foreground">
+                Now in private beta · YC-backed founders using it daily
+              </span>
             </div>
           </Reveal>
           <Reveal delay={0.05}>
             <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-              Your AI <span className="gradient-text">Co-founder</span> for Building Smarter Startups
+              Your AI <span className="gradient-text">Co-founder</span> for Building Smarter
+              Startups
             </h1>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Startup Copilot OS connects all your business tools into one intelligent AI platform that understands your company,
-              predicts problems, automates operations, and helps founders make better decisions.
+              Startup Copilot OS connects all your business tools into one intelligent AI platform
+              that understands your company, predicts problems, automates operations, and helps
+              founders make better decisions.
             </p>
           </Reveal>
           <Reveal delay={0.15}>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a href="#pricing" className="inline-flex items-center gap-2 rounded-full gradient-brand-bg px-5 py-3 text-sm font-medium text-primary-foreground ring-glow transition-transform hover:scale-[1.03]">
+              <a
+                href="/auth"
+                className="inline-flex items-center gap-2 rounded-full gradient-brand-bg px-5 py-3 text-sm font-medium text-primary-foreground ring-glow transition-transform hover:scale-[1.03]"
+              >
                 Get Started <ArrowRight className="h-4 w-4" />
               </a>
-              <a href="#how" className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-sm font-medium transition-colors hover:bg-white/10">
+              <a
+                href="#how"
+                className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-sm font-medium transition-colors hover:bg-white/10"
+              >
                 <Play className="h-4 w-4" /> Watch Demo
               </a>
             </div>
@@ -320,7 +422,9 @@ function Hero() {
           <Reveal delay={0.2}>
             <div className="mt-10 flex items-center gap-6 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
-                {Array.from({length:5}).map((_,i)=><Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400"/>)}
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                ))}
                 <span className="ml-1">4.9 from 300+ founders</span>
               </div>
               <span className="hidden sm:inline">·</span>
@@ -338,13 +442,33 @@ function Hero() {
 
 function Problem() {
   const problems = [
-    { icon: Database, title: "Scattered data", text: "Info trapped across 20+ apps and spreadsheets." },
-    { icon: LayoutDashboard, title: "App switching", text: "Hours lost jumping between dashboards every day." },
+    {
+      icon: Database,
+      title: "Scattered data",
+      text: "Info trapped across 20+ apps and spreadsheets.",
+    },
+    {
+      icon: LayoutDashboard,
+      title: "App switching",
+      text: "Hours lost jumping between dashboards every day.",
+    },
     { icon: Zap, title: "Manual busywork", text: "Repetitive tasks that no one wants to own." },
     { icon: Activity, title: "Slow decisions", text: "Reports take days. Momentum dies waiting." },
-    { icon: TrendingUp, title: "Missed opportunities", text: "Signals buried under noise across teams." },
-    { icon: Users, title: "Poor collaboration", text: "Context lives in DMs, not where work happens." },
-    { icon: ShieldCheck, title: "Founder burnout", text: "You become the human integration layer." },
+    {
+      icon: TrendingUp,
+      title: "Missed opportunities",
+      text: "Signals buried under noise across teams.",
+    },
+    {
+      icon: Users,
+      title: "Poor collaboration",
+      text: "Context lives in DMs, not where work happens.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Founder burnout",
+      text: "You become the human integration layer.",
+    },
   ];
   return (
     <section className="relative py-24 sm:py-32">
@@ -400,7 +524,8 @@ function Solution() {
               Meet <span className="gradient-text">Startup Copilot OS</span>
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              A single AI-powered operating system that understands your business and turns every tool into intelligence.
+              A single AI-powered operating system that understands your business and turns every
+              tool into intelligence.
             </p>
           </div>
         </Reveal>
@@ -409,7 +534,10 @@ function Solution() {
           <Reveal>
             <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
               {tools.map((t) => (
-                <div key={t.name} className="glass flex h-16 w-16 flex-col items-center justify-center rounded-xl">
+                <div
+                  key={t.name}
+                  className="glass flex h-16 w-16 flex-col items-center justify-center rounded-xl"
+                >
                   <t.icon className="h-5 w-5 text-brand-glow" />
                   <span className="mt-1 text-[10px] text-muted-foreground">{t.name}</span>
                 </div>
@@ -426,7 +554,9 @@ function Solution() {
                 </div>
                 <div>
                   <div className="text-sm font-medium">AI Intelligence Engine</div>
-                  <div className="text-xs text-muted-foreground">Context · Reasoning · Automation</div>
+                  <div className="text-xs text-muted-foreground">
+                    Context · Reasoning · Automation
+                  </div>
                 </div>
               </div>
             </Reveal>
@@ -447,12 +577,36 @@ function Solution() {
 
 function Features() {
   const feats = [
-    { icon: Bot, title: "AI Business Assistant", text: "Ask anything about your company in natural language and get instant, contextual answers." },
-    { icon: Zap, title: "Smart Workflow Automation", text: "Automate repetitive business operations with AI agents that learn how you work." },
-    { icon: LineChart, title: "Predictive Analytics", text: "Identify churn, revenue risks and opportunities before they happen." },
-    { icon: LayoutDashboard, title: "Unified Dashboard", text: "See every department — sales, product, ops — in one live view." },
-    { icon: Network, title: "Knowledge Graph", text: "Every doc, customer, meeting and decision automatically connected." },
-    { icon: Users, title: "Multi-Agent AI", text: "Dedicated agents for Marketing, HR, Sales, Finance, Engineering and Support." },
+    {
+      icon: Bot,
+      title: "AI Business Assistant",
+      text: "Ask anything about your company in natural language and get instant, contextual answers.",
+    },
+    {
+      icon: Zap,
+      title: "Smart Workflow Automation",
+      text: "Automate repetitive business operations with AI agents that learn how you work.",
+    },
+    {
+      icon: LineChart,
+      title: "Predictive Analytics",
+      text: "Identify churn, revenue risks and opportunities before they happen.",
+    },
+    {
+      icon: LayoutDashboard,
+      title: "Unified Dashboard",
+      text: "See every department — sales, product, ops — in one live view.",
+    },
+    {
+      icon: Network,
+      title: "Knowledge Graph",
+      text: "Every doc, customer, meeting and decision automatically connected.",
+    },
+    {
+      icon: Users,
+      title: "Multi-Agent AI",
+      text: "Dedicated agents for Marketing, HR, Sales, Finance, Engineering and Support.",
+    },
   ];
   return (
     <section id="features" className="relative py-24 sm:py-32">
@@ -476,11 +630,18 @@ function Features() {
                   <f.icon className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <h3 className="relative mt-5 text-lg font-semibold">{f.title}</h3>
-                <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
+                <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {f.text}
+                </p>
                 {f.title === "Multi-Agent AI" && (
                   <div className="relative mt-4 flex flex-wrap gap-1.5">
-                    {["Marketing","HR","Sales","Finance","Engineering","Support"].map((a)=>(
-                      <span key={a} className="rounded-full border border-border bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">{a}</span>
+                    {["Marketing", "HR", "Sales", "Finance", "Engineering", "Support"].map((a) => (
+                      <span
+                        key={a}
+                        className="rounded-full border border-border bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground"
+                      >
+                        {a}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -510,7 +671,9 @@ function HowItWorks() {
             <h2 className="font-display text-4xl font-semibold sm:text-5xl">
               How it <span className="gradient-text">works</span>
             </h2>
-            <p className="mt-4 text-muted-foreground">From connect to autonomous in under 10 minutes.</p>
+            <p className="mt-4 text-muted-foreground">
+              From connect to autonomous in under 10 minutes.
+            </p>
           </div>
         </Reveal>
         <div className="relative mt-16">
@@ -520,8 +683,12 @@ function HowItWorks() {
               const left = i % 2 === 0;
               return (
                 <Reveal key={s.t} delay={i * 0.05}>
-                  <div className={`relative flex items-start gap-6 sm:justify-${left ? "start" : "end"}`}>
-                    <div className={`hidden sm:block sm:w-1/2 ${left ? "pr-10 text-right" : "order-2 pl-10"}`}>
+                  <div
+                    className={`relative flex items-start gap-6 sm:justify-${left ? "start" : "end"}`}
+                  >
+                    <div
+                      className={`hidden sm:block sm:w-1/2 ${left ? "pr-10 text-right" : "order-2 pl-10"}`}
+                    >
                       <div className="glass inline-block rounded-2xl p-5 text-left">
                         <div className="text-xs text-brand-glow">Step {i + 1}</div>
                         <div className="mt-1 font-semibold">{s.t}</div>
@@ -632,18 +799,24 @@ function Stats() {
 function Testimonials() {
   const items = [
     {
-      name: "Maya Chen", role: "CEO, Lumen AI",
-      quote: "It's like hiring a chief of staff on day one. We killed 6 SaaS subscriptions in our first month.",
+      name: "Maya Chen",
+      role: "CEO, Lumen AI",
+      quote:
+        "It's like hiring a chief of staff on day one. We killed 6 SaaS subscriptions in our first month.",
       color: "oklch(0.72 0.2 300)",
     },
     {
-      name: "Daniel Osei", role: "Co-founder, Northwind Labs",
-      quote: "The predictive churn signals alone paid for the product 10x over. It just sees things we miss.",
+      name: "Daniel Osei",
+      role: "Co-founder, Northwind Labs",
+      quote:
+        "The predictive churn signals alone paid for the product 10x over. It just sees things we miss.",
       color: "oklch(0.7 0.18 220)",
     },
     {
-      name: "Priya Raman", role: "Founder, Ferrous",
-      quote: "Feels like the OS founders always deserved. Every metric, every tool, one calm dashboard.",
+      name: "Priya Raman",
+      role: "Founder, Ferrous",
+      quote:
+        "Feels like the OS founders always deserved. Every metric, every tool, one calm dashboard.",
       color: "oklch(0.72 0.18 30)",
     },
   ];
@@ -652,7 +825,9 @@ function Testimonials() {
       <div className="mx-auto max-w-7xl px-6">
         <Reveal>
           <div className="text-center">
-            <h2 className="font-display text-4xl font-semibold sm:text-5xl">Loved by <span className="gradient-text">founders</span></h2>
+            <h2 className="font-display text-4xl font-semibold sm:text-5xl">
+              Loved by <span className="gradient-text">founders</span>
+            </h2>
           </div>
         </Reveal>
         <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -660,13 +835,22 @@ function Testimonials() {
             <Reveal key={t.name} delay={i * 0.05}>
               <div className="glass h-full rounded-2xl p-6">
                 <div className="flex items-center gap-1 text-yellow-400">
-                  {Array.from({length:5}).map((_,j)=><Star key={j} className="h-4 w-4 fill-yellow-400"/>)}
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-yellow-400" />
+                  ))}
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-foreground/90">"{t.quote}"</p>
                 <div className="mt-6 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium text-primary-foreground"
-                    style={{ background: `linear-gradient(135deg, ${t.color}, oklch(0.6 0.22 285))` }}>
-                    {t.name.split(" ").map((n) => n[0]).join("")}
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-full font-medium text-primary-foreground"
+                    style={{
+                      background: `linear-gradient(135deg, ${t.color}, oklch(0.6 0.22 285))`,
+                    }}
+                  >
+                    {t.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </div>
                   <div>
                     <div className="text-sm font-medium">{t.name}</div>
@@ -685,23 +869,49 @@ function Testimonials() {
 function Pricing() {
   const plans = [
     {
-      name: "Starter", price: "$49", period: "/mo",
+      name: "Starter",
+      price: "$49",
+      period: "/mo",
       desc: "For early-stage startups finding product-market fit.",
-      features: ["Up to 5 seats","5 integrations","AI assistant","Basic automation","Community support"],
+      features: [
+        "Up to 5 seats",
+        "5 integrations",
+        "AI assistant",
+        "Basic automation",
+        "Community support",
+      ],
       cta: "Start free",
       highlight: false,
     },
     {
-      name: "Professional", price: "$199", period: "/mo",
+      name: "Professional",
+      price: "$199",
+      period: "/mo",
       desc: "For growing teams that need real intelligence.",
-      features: ["Up to 25 seats","Unlimited integrations","Multi-agent AI","Predictive analytics","Workflow automation","Priority support"],
+      features: [
+        "Up to 25 seats",
+        "Unlimited integrations",
+        "Multi-agent AI",
+        "Predictive analytics",
+        "Workflow automation",
+        "Priority support",
+      ],
       cta: "Start 14-day trial",
       highlight: true,
     },
     {
-      name: "Enterprise", price: "Custom", period: "",
+      name: "Enterprise",
+      price: "Custom",
+      period: "",
       desc: "Custom AI solutions for scaled companies.",
-      features: ["Unlimited seats","Dedicated AI models","SSO / SAML","On-prem knowledge graph","Custom agents","24/7 SLA"],
+      features: [
+        "Unlimited seats",
+        "Dedicated AI models",
+        "SSO / SAML",
+        "On-prem knowledge graph",
+        "Custom agents",
+        "24/7 SLA",
+      ],
       cta: "Talk to sales",
       highlight: false,
     },
@@ -711,14 +921,20 @@ function Pricing() {
       <div className="mx-auto max-w-7xl px-6">
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-4xl font-semibold sm:text-5xl">Simple, <span className="gradient-text">honest pricing</span></h2>
-            <p className="mt-4 text-muted-foreground">Start free. Scale when the intelligence pays for itself.</p>
+            <h2 className="font-display text-4xl font-semibold sm:text-5xl">
+              Simple, <span className="gradient-text">honest pricing</span>
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Start free. Scale when the intelligence pays for itself.
+            </p>
           </div>
         </Reveal>
         <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
           {plans.map((p, i) => (
             <Reveal key={p.name} delay={i * 0.05}>
-              <div className={`relative h-full rounded-2xl p-7 ${p.highlight ? "glass-strong ring-glow" : "glass"}`}>
+              <div
+                className={`relative h-full rounded-2xl p-7 ${p.highlight ? "glass-strong ring-glow" : "glass"}`}
+              >
                 {p.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full gradient-brand-bg px-3 py-0.5 text-[11px] font-medium text-primary-foreground">
                     Most popular
@@ -730,9 +946,14 @@ function Pricing() {
                   <span className="text-muted-foreground">{p.period}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
-                <a href="#" className={`mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium transition-transform hover:scale-[1.02] ${
-                  p.highlight ? "gradient-brand-bg text-primary-foreground" : "glass text-foreground hover:bg-white/10"
-                }`}>
+                <a
+                  href="/auth"
+                  className={`mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium transition-transform hover:scale-[1.02] ${
+                    p.highlight
+                      ? "gradient-brand-bg text-primary-foreground"
+                      : "glass text-foreground hover:bg-white/10"
+                  }`}
+                >
                   {p.cta} <ArrowRight className="h-3.5 w-3.5" />
                 </a>
                 <ul className="mt-6 space-y-2.5">
@@ -754,12 +975,30 @@ function Pricing() {
 
 function FAQ() {
   const faqs = [
-    { q: "What is Startup Copilot OS?", a: "It's an AI operating system that unifies your business tools — Slack, GitHub, Stripe, CRM, and more — into one intelligent layer that reasons about your company." },
-    { q: "How long does setup take?", a: "Most teams are live in under 10 minutes. One-click integrations sync securely and the AI starts building context immediately." },
-    { q: "Is my company data secure?", a: "Yes. We're SOC 2 Type II compliant, encrypt data at rest and in transit, and never train shared models on your data." },
-    { q: "Which tools do you integrate with?", a: "20+ platforms including Slack, GitHub, Notion, Gmail, HubSpot, Salesforce, Stripe, Linear, Intercom, Zendesk, Jira and more." },
-    { q: "Can I bring my own AI models?", a: "Enterprise customers can bring their own models or run fully on-prem. Everyone else uses our tuned multi-agent stack." },
-    { q: "Do you offer a free trial?", a: "Yes — Professional includes a 14-day free trial. Starter has a generous free tier for teams under 3 people." },
+    {
+      q: "What is Startup Copilot OS?",
+      a: "It's an AI operating system that unifies your business tools — Slack, GitHub, Stripe, CRM, and more — into one intelligent layer that reasons about your company.",
+    },
+    {
+      q: "How long does setup take?",
+      a: "Most teams are live in under 10 minutes. One-click integrations sync securely and the AI starts building context immediately.",
+    },
+    {
+      q: "Is my company data secure?",
+      a: "Yes. We're SOC 2 Type II compliant, encrypt data at rest and in transit, and never train shared models on your data.",
+    },
+    {
+      q: "Which tools do you integrate with?",
+      a: "20+ platforms including Slack, GitHub, Notion, Gmail, HubSpot, Salesforce, Stripe, Linear, Intercom, Zendesk, Jira and more.",
+    },
+    {
+      q: "Can I bring my own AI models?",
+      a: "Enterprise customers can bring their own models or run fully on-prem. Everyone else uses our tuned multi-agent stack.",
+    },
+    {
+      q: "Do you offer a free trial?",
+      a: "Yes — Professional includes a 14-day free trial. Starter has a generous free tier for teams under 3 people.",
+    },
   ];
   const [open, setOpen] = useState<number | null>(0);
   return (
@@ -767,7 +1006,9 @@ function FAQ() {
       <div className="mx-auto max-w-3xl px-6">
         <Reveal>
           <div className="text-center">
-            <h2 className="font-display text-4xl font-semibold sm:text-5xl">Frequently asked <span className="gradient-text">questions</span></h2>
+            <h2 className="font-display text-4xl font-semibold sm:text-5xl">
+              Frequently asked <span className="gradient-text">questions</span>
+            </h2>
           </div>
         </Reveal>
         <div className="mt-12 space-y-3">
@@ -779,12 +1020,14 @@ function FAQ() {
                   className="flex w-full items-center justify-between px-5 py-4 text-left"
                 >
                   <span className="font-medium">{f.q}</span>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open === i ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`h-4 w-4 text-muted-foreground transition-transform ${open === i ? "rotate-180" : ""}`}
+                  />
                 </button>
                 <motion.div
                   initial={false}
                   animate={{ height: open === i ? "auto" : 0, opacity: open === i ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: [0.22,1,0.36,1] }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   className="overflow-hidden"
                 >
                   <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
@@ -814,10 +1057,16 @@ function CTA() {
             Join hundreds of founders shipping smarter with Startup Copilot OS.
           </p>
           <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a href="#pricing" className="inline-flex items-center gap-2 rounded-full gradient-brand-bg px-5 py-3 text-sm font-medium text-primary-foreground ring-glow hover:scale-[1.03] transition-transform">
+            <a
+              href="/auth"
+              className="inline-flex items-center gap-2 rounded-full gradient-brand-bg px-5 py-3 text-sm font-medium text-primary-foreground ring-glow hover:scale-[1.03] transition-transform"
+            >
               Get Started <ArrowRight className="h-4 w-4" />
             </a>
-            <a href="#how" className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-sm font-medium hover:bg-white/10">
+            <a
+              href="#how"
+              className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-sm font-medium hover:bg-white/10"
+            >
               <Play className="h-4 w-4" /> Watch Demo
             </a>
           </div>
@@ -829,9 +1078,9 @@ function CTA() {
 
 function Footer() {
   const cols = [
-    { title: "Product", links: ["Features","Pricing","Integrations","Changelog"] },
-    { title: "Company", links: ["About","Careers","Contact","Blog"] },
-    { title: "Legal", links: ["Privacy Policy","Terms","Security","DPA"] },
+    { title: "Product", links: ["Features", "Pricing", "Integrations", "Changelog"] },
+    { title: "Company", links: ["About", "Careers", "Contact", "Blog"] },
+    { title: "Legal", links: ["Privacy Policy", "Terms", "Security", "DPA"] },
   ];
   return (
     <footer className="relative border-t border-border pt-16 pb-10">
@@ -842,14 +1091,20 @@ function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-brand-bg">
                 <Sparkles className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-display font-semibold">Startup Copilot <span className="gradient-text">OS</span></span>
+              <span className="font-display font-semibold">
+                Startup Copilot <span className="gradient-text">OS</span>
+              </span>
             </div>
             <p className="mt-4 max-w-sm text-sm text-muted-foreground">
               The AI operating system for modern startups. Connect every tool, unlock every insight.
             </p>
             <div className="mt-5 flex items-center gap-2">
               {[Twitter, Linkedin, GithubIcon].map((I, i) => (
-                <a key={i} href="#" className="flex h-9 w-9 items-center justify-center rounded-lg glass transition-colors hover:bg-white/10">
+                <a
+                  key={i}
+                  href="#"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg glass transition-colors hover:bg-white/10"
+                >
                   <I className="h-4 w-4" />
                 </a>
               ))}
@@ -861,7 +1116,12 @@ function Footer() {
               <ul className="mt-4 space-y-2">
                 {c.links.map((l) => (
                   <li key={l}>
-                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">{l}</a>
+                    <a
+                      href="#"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {l}
+                    </a>
                   </li>
                 ))}
               </ul>
