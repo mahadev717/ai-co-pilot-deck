@@ -532,6 +532,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         customers,
         teamPRs,
         login,
+        register,
         logout,
         connectIntegration,
         disconnectIntegration,
