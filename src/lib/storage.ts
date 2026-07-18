@@ -45,6 +45,7 @@ export const storage = {
     try {
       this.remove("registered_users");
       this.remove("user");
+      this.remove("presentation_demo");
       for (const key of Object.keys(localStorage)) {
         if (
           key.startsWith(`${PREFIX}profile_status_`) ||

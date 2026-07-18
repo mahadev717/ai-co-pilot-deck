@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { IntegrationDetailPanel } from "@/components/integration-detail";
 
-export const Route = createFileRoute("/employee/integrations/$id")({
+// Flat route so tool dashboards are siblings of the integrations list.
+export const Route = createFileRoute("/employee/integrations_/$id")({
   component: EmployeeIntegrationDetail,
 });
 

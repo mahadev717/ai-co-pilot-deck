@@ -29,8 +29,8 @@ import { Route as DashboardIntegrationsRouteImport } from './routes/dashboard/in
 import { Route as DashboardCustomersRouteImport } from './routes/dashboard/customers'
 import { Route as DashboardChatRouteImport } from './routes/dashboard/chat'
 import { Route as DashboardAgentsRouteImport } from './routes/dashboard/agents'
-import { Route as EmployeeIntegrationsIdRouteImport } from './routes/employee/integrations.$id'
-import { Route as DashboardIntegrationsIdRouteImport } from './routes/dashboard/integrations.$id'
+import { Route as EmployeeIntegrationsIdRouteImport } from './routes/employee/integrations_.$id'
+import { Route as DashboardIntegrationsIdRouteImport } from './routes/dashboard/integrations_.$id'
 
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
@@ -133,14 +133,14 @@ const DashboardAgentsRoute = DashboardAgentsRouteImport.update({
   getParentRoute: () => DashboardRoute,
 } as any)
 const EmployeeIntegrationsIdRoute = EmployeeIntegrationsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => EmployeeIntegrationsRoute,
+  id: '/integrations_/$id',
+  path: '/integrations/$id',
+  getParentRoute: () => EmployeeRoute,
 } as any)
 const DashboardIntegrationsIdRoute = DashboardIntegrationsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => DashboardIntegrationsRoute,
+  id: '/integrations_/$id',
+  path: '/integrations/$id',
+  getParentRoute: () => DashboardRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -152,14 +152,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/agents': typeof DashboardAgentsRoute
   '/dashboard/chat': typeof DashboardChatRoute
   '/dashboard/customers': typeof DashboardCustomersRoute
-  '/dashboard/integrations': typeof DashboardIntegrationsRouteWithChildren
+  '/dashboard/integrations': typeof DashboardIntegrationsRoute
   '/dashboard/leaves': typeof DashboardLeavesRoute
   '/dashboard/revenue': typeof DashboardRevenueRoute
   '/dashboard/team': typeof DashboardTeamRoute
   '/employee/agents': typeof EmployeeAgentsRoute
   '/employee/auth': typeof EmployeeAuthRoute
   '/employee/chat': typeof EmployeeChatRoute
-  '/employee/integrations': typeof EmployeeIntegrationsRouteWithChildren
+  '/employee/integrations': typeof EmployeeIntegrationsRoute
   '/employee/leaves': typeof EmployeeLeavesRoute
   '/employee/team': typeof EmployeeTeamRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -174,14 +174,14 @@ export interface FileRoutesByTo {
   '/dashboard/agents': typeof DashboardAgentsRoute
   '/dashboard/chat': typeof DashboardChatRoute
   '/dashboard/customers': typeof DashboardCustomersRoute
-  '/dashboard/integrations': typeof DashboardIntegrationsRouteWithChildren
+  '/dashboard/integrations': typeof DashboardIntegrationsRoute
   '/dashboard/leaves': typeof DashboardLeavesRoute
   '/dashboard/revenue': typeof DashboardRevenueRoute
   '/dashboard/team': typeof DashboardTeamRoute
   '/employee/agents': typeof EmployeeAgentsRoute
   '/employee/auth': typeof EmployeeAuthRoute
   '/employee/chat': typeof EmployeeChatRoute
-  '/employee/integrations': typeof EmployeeIntegrationsRouteWithChildren
+  '/employee/integrations': typeof EmployeeIntegrationsRoute
   '/employee/leaves': typeof EmployeeLeavesRoute
   '/employee/team': typeof EmployeeTeamRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -199,20 +199,20 @@ export interface FileRoutesById {
   '/dashboard/agents': typeof DashboardAgentsRoute
   '/dashboard/chat': typeof DashboardChatRoute
   '/dashboard/customers': typeof DashboardCustomersRoute
-  '/dashboard/integrations': typeof DashboardIntegrationsRouteWithChildren
+  '/dashboard/integrations': typeof DashboardIntegrationsRoute
   '/dashboard/leaves': typeof DashboardLeavesRoute
   '/dashboard/revenue': typeof DashboardRevenueRoute
   '/dashboard/team': typeof DashboardTeamRoute
   '/employee/agents': typeof EmployeeAgentsRoute
   '/employee/auth': typeof EmployeeAuthRoute
   '/employee/chat': typeof EmployeeChatRoute
-  '/employee/integrations': typeof EmployeeIntegrationsRouteWithChildren
+  '/employee/integrations': typeof EmployeeIntegrationsRoute
   '/employee/leaves': typeof EmployeeLeavesRoute
   '/employee/team': typeof EmployeeTeamRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/employee/': typeof EmployeeIndexRoute
-  '/dashboard/integrations/$id': typeof DashboardIntegrationsIdRoute
-  '/employee/integrations/$id': typeof EmployeeIntegrationsIdRoute
+  '/dashboard/integrations_/$id': typeof DashboardIntegrationsIdRoute
+  '/employee/integrations_/$id': typeof EmployeeIntegrationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -283,8 +283,8 @@ export interface FileRouteTypes {
     | '/employee/team'
     | '/dashboard/'
     | '/employee/'
-    | '/dashboard/integrations/$id'
-    | '/employee/integrations/$id'
+    | '/dashboard/integrations_/$id'
+    | '/employee/integrations_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -437,91 +437,71 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/employee/integrations/$id': {
-      id: '/employee/integrations/$id'
-      path: '/$id'
+    '/employee/integrations_/$id': {
+      id: '/employee/integrations_/$id'
+      path: '/integrations/$id'
       fullPath: '/employee/integrations/$id'
       preLoaderRoute: typeof EmployeeIntegrationsIdRouteImport
-      parentRoute: typeof EmployeeIntegrationsRoute
+      parentRoute: typeof EmployeeRoute
     }
-    '/dashboard/integrations/$id': {
-      id: '/dashboard/integrations/$id'
-      path: '/$id'
+    '/dashboard/integrations_/$id': {
+      id: '/dashboard/integrations_/$id'
+      path: '/integrations/$id'
       fullPath: '/dashboard/integrations/$id'
       preLoaderRoute: typeof DashboardIntegrationsIdRouteImport
-      parentRoute: typeof DashboardIntegrationsRoute
+      parentRoute: typeof DashboardRoute
     }
   }
 }
-
-interface DashboardIntegrationsRouteChildren {
-  DashboardIntegrationsIdRoute: typeof DashboardIntegrationsIdRoute
-}
-
-const DashboardIntegrationsRouteChildren: DashboardIntegrationsRouteChildren = {
-  DashboardIntegrationsIdRoute: DashboardIntegrationsIdRoute,
-}
-
-const DashboardIntegrationsRouteWithChildren =
-  DashboardIntegrationsRoute._addFileChildren(
-    DashboardIntegrationsRouteChildren,
-  )
 
 interface DashboardRouteChildren {
   DashboardAgentsRoute: typeof DashboardAgentsRoute
   DashboardChatRoute: typeof DashboardChatRoute
   DashboardCustomersRoute: typeof DashboardCustomersRoute
-  DashboardIntegrationsRoute: typeof DashboardIntegrationsRouteWithChildren
+  DashboardIntegrationsRoute: typeof DashboardIntegrationsRoute
   DashboardLeavesRoute: typeof DashboardLeavesRoute
   DashboardRevenueRoute: typeof DashboardRevenueRoute
   DashboardTeamRoute: typeof DashboardTeamRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardIntegrationsIdRoute: typeof DashboardIntegrationsIdRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAgentsRoute: DashboardAgentsRoute,
   DashboardChatRoute: DashboardChatRoute,
   DashboardCustomersRoute: DashboardCustomersRoute,
-  DashboardIntegrationsRoute: DashboardIntegrationsRouteWithChildren,
+  DashboardIntegrationsRoute: DashboardIntegrationsRoute,
   DashboardLeavesRoute: DashboardLeavesRoute,
   DashboardRevenueRoute: DashboardRevenueRoute,
   DashboardTeamRoute: DashboardTeamRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardIntegrationsIdRoute: DashboardIntegrationsIdRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
-interface EmployeeIntegrationsRouteChildren {
-  EmployeeIntegrationsIdRoute: typeof EmployeeIntegrationsIdRoute
-}
-
-const EmployeeIntegrationsRouteChildren: EmployeeIntegrationsRouteChildren = {
-  EmployeeIntegrationsIdRoute: EmployeeIntegrationsIdRoute,
-}
-
-const EmployeeIntegrationsRouteWithChildren =
-  EmployeeIntegrationsRoute._addFileChildren(EmployeeIntegrationsRouteChildren)
-
 interface EmployeeRouteChildren {
   EmployeeAgentsRoute: typeof EmployeeAgentsRoute
   EmployeeAuthRoute: typeof EmployeeAuthRoute
   EmployeeChatRoute: typeof EmployeeChatRoute
-  EmployeeIntegrationsRoute: typeof EmployeeIntegrationsRouteWithChildren
+  EmployeeIntegrationsRoute: typeof EmployeeIntegrationsRoute
   EmployeeLeavesRoute: typeof EmployeeLeavesRoute
   EmployeeTeamRoute: typeof EmployeeTeamRoute
   EmployeeIndexRoute: typeof EmployeeIndexRoute
+  EmployeeIntegrationsIdRoute: typeof EmployeeIntegrationsIdRoute
 }
 
 const EmployeeRouteChildren: EmployeeRouteChildren = {
   EmployeeAgentsRoute: EmployeeAgentsRoute,
   EmployeeAuthRoute: EmployeeAuthRoute,
   EmployeeChatRoute: EmployeeChatRoute,
-  EmployeeIntegrationsRoute: EmployeeIntegrationsRouteWithChildren,
+  EmployeeIntegrationsRoute: EmployeeIntegrationsRoute,
   EmployeeLeavesRoute: EmployeeLeavesRoute,
   EmployeeTeamRoute: EmployeeTeamRoute,
   EmployeeIndexRoute: EmployeeIndexRoute,
+  EmployeeIntegrationsIdRoute: EmployeeIntegrationsIdRoute,
 }
 
 const EmployeeRouteWithChildren = EmployeeRoute._addFileChildren(

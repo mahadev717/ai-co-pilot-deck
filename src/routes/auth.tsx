@@ -116,13 +116,19 @@ function AuthComponent() {
     setEmail("admin@copilot.ai");
     setPassword("demo1234");
     setName("Demo Admin");
-    const result = await enterPresentationDemo("founder");
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
+    try {
+      const result = await enterPresentationDemo("founder");
+      if (!result.ok) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+      // Hard navigate so auth guards always see the new session
+      window.location.assign("/dashboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Demo login failed");
+      setLoading(false);
     }
-    navigate({ to: "/dashboard" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

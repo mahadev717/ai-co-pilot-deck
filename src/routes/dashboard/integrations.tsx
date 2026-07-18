@@ -1,5 +1,5 @@
 import { useState, type ComponentType, type FormEvent } from "react";
-import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAppState, type Integration } from "../../hooks/use-app-state";
 import {
   getCredentialSpec,
@@ -114,13 +114,24 @@ function IntegrationCard({
   onDisconnect: (id: string) => void;
   isBusy: boolean;
 }) {
+  const navigate = useNavigate();
   const Icon = iconMap[item.id] || Zap;
   const catColor = categoryColors[item.category] ?? "text-muted-foreground bg-white/5";
   const catLabel = categoryLabels[item.category] ?? item.category;
-  const detailTo =
-    basePath === "/employee"
-      ? ("/employee/integrations/$id" as const)
-      : ("/dashboard/integrations/$id" as const);
+
+  const openDashboard = () => {
+    if (basePath === "/employee") {
+      void navigate({
+        to: "/employee/integrations/$id",
+        params: { id: item.id },
+      });
+    } else {
+      void navigate({
+        to: "/dashboard/integrations/$id",
+        params: { id: item.id },
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -129,7 +140,16 @@ function IntegrationCard({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.25 }}
-      className={`glass flex flex-col justify-between rounded-2xl p-5 transition-all duration-300 ${
+      role="button"
+      tabIndex={0}
+      onClick={openDashboard}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openDashboard();
+        }
+      }}
+      className={`glass flex cursor-pointer flex-col justify-between rounded-2xl p-5 transition-all duration-300 hover:ring-1 hover:ring-brand/40 ${
         item.connected ? "ring-1 ring-primary/20 bg-white/[0.04]" : ""
       }`}
     >
@@ -155,14 +175,8 @@ function IntegrationCard({
           </div>
         </div>
 
-        <Link
-          to={detailTo}
-          params={{ id: item.id }}
-          className="mt-4 block text-sm font-semibold hover:text-brand-glow"
-        >
-          {item.name}
-        </Link>
-        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
+        <h3 className="mt-4 text-sm font-semibold hover:text-brand-glow">{item.name}</h3>
+        <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
           {item.description}
         </p>
         {item.connected && item.accountLabel && (
@@ -172,31 +186,41 @@ function IntegrationCard({
         )}
       </div>
 
-      <div className="mt-5 border-t border-border/50 pt-4 flex items-center justify-between gap-2">
-        <Link
-          to={detailTo}
-          params={{ id: item.id }}
-          className="text-[10px] text-brand-glow hover:underline"
-        >
-          {item.connected ? "Open intelligence →" : "Preview analysis →"}
-        </Link>
-
+      <div className="mt-5 flex items-center justify-between gap-2 border-t border-border/50 pt-4">
         {item.connected ? (
-          <button
-            id={`disconnect-${item.id}`}
-            type="button"
-            onClick={() => onDisconnect(item.id)}
-            className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/15"
-          >
-            Disconnect
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openDashboard();
+              }}
+              className="inline-flex items-center gap-1 rounded-lg gradient-brand-bg px-3 py-1.5 text-[11px] font-medium text-primary-foreground"
+            >
+              Open dashboard <ArrowRight className="h-3 w-3" />
+            </button>
+            <button
+              id={`disconnect-${item.id}`}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDisconnect(item.id);
+              }}
+              className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-[11px] font-medium text-destructive hover:bg-destructive/15"
+            >
+              Disconnect
+            </button>
+          </>
         ) : (
           <button
             id={`connect-${item.id}`}
             type="button"
-            onClick={() => onConnect(item.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onConnect(item.id);
+            }}
             disabled={isBusy || item.syncing}
-            className="inline-flex items-center gap-1 rounded-lg gradient-brand-bg px-3 py-1.5 text-[11px] font-medium text-primary-foreground transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:scale-100"
+            className="ml-auto inline-flex items-center gap-1 rounded-lg gradient-brand-bg px-3 py-1.5 text-[11px] font-medium text-primary-foreground disabled:opacity-50"
           >
             {item.syncing ? (
               <>
@@ -226,13 +250,10 @@ export function IntegrationsManager() {
   } = useAppState();
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const basePath: "/dashboard" | "/employee" = pathname.startsWith("/employee")
     ? "/employee"
     : "/dashboard";
-  const detailTo =
-    basePath === "/employee"
-      ? ("/employee/integrations/$id" as const)
-      : ("/dashboard/integrations/$id" as const);
 
   const [activeSyncId, setActiveSyncId] = useState<string | null>(null);
   const [syncStep, setSyncStep] = useState(0);
@@ -241,6 +262,20 @@ export function IntegrationsManager() {
   const [connectingAll, setConnectingAll] = useState(false);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  const openToolDashboard = (id: string) => {
+    if (basePath === "/employee") {
+      void navigate({
+        to: "/employee/integrations/$id",
+        params: { id },
+      });
+    } else {
+      void navigate({
+        to: "/dashboard/integrations/$id",
+        params: { id },
+      });
+    }
+  };
 
   const openLinkForm = (id: string) => {
     const spec = getCredentialSpec(id);
@@ -259,15 +294,17 @@ export function IntegrationsManager() {
   const runConnectAnimation = async (id: string, credentials: Record<string, string>) => {
     setActiveSyncId(id);
     setSyncStep(1);
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 400));
     setSyncStep(2);
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 450));
     setSyncStep(3);
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 400));
     setSyncStep(4);
     await connectIntegration(id, credentials);
     setActiveSyncId(null);
     setSyncStep(0);
+    // After link succeeds → open that tool's dedicated dashboard
+    openToolDashboard(id);
   };
 
   const submitLink = async (e: FormEvent) => {
@@ -351,35 +388,47 @@ export function IntegrationsManager() {
       </div>
 
       <div className="rounded-2xl border border-brand/20 bg-brand/5 px-4 py-3 text-xs text-muted-foreground">
-        Presentation tip: click <span className="text-foreground">Link all</span> to connect every
-        tool with dummy intelligence (no API keys needed). Open any card for analysis — GitHub
-        includes repos, code, and AI review.
+        All 20 tools below get a dedicated dashboard when linked: Stripe, QuickBooks, GitHub,
+        Linear, Jira, Figma, Slack, Notion, Google Calendar, AWS, PagerDuty, HubSpot, Gmail,
+        Calendly, Zendesk, Intercom, Google Analytics, Mixpanel, Mailchimp, and X / Twitter.
       </div>
 
       {connectedCount > 0 && (
-        <div className="glass space-y-3 rounded-2xl p-5">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold">Connected ({connectedCount})</h2>
-            <span className="text-[10px] text-muted-foreground">
-              Click any tool for live analysis
-            </span>
+        <div className="space-y-3">
+          <div className="flex items-end justify-between gap-2">
+            <div>
+              <h2 className="font-display text-lg font-semibold">Tool dashboards</h2>
+              <p className="text-xs text-muted-foreground">
+                Every linked tool has its own dashboard — click to open analysis + AI explanation
+              </p>
+            </div>
+            <span className="text-[10px] text-muted-foreground">{connectedCount} ready</span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {integrations
               .filter((i) => i.connected)
               .map((i) => {
                 const Icon = iconMap[i.id] || Zap;
                 return (
-                  <Link
+                  <button
                     key={i.id}
-                    to={detailTo}
-                    params={{ id: i.id }}
-                    className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 transition-colors hover:bg-emerald-500/20"
+                    type="button"
+                    onClick={() => openToolDashboard(i.id)}
+                    className="glass group flex flex-col items-start gap-3 rounded-2xl p-4 text-left transition-all hover:ring-1 hover:ring-brand/40"
                   >
-                    <Icon className="h-3.5 w-3.5" />
-                    {i.name}
-                    <ArrowRight className="h-3 w-3 opacity-60" />
-                  </Link>
+                    <div
+                      className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5"
+                      style={{ color: i.color !== "#000000" ? i.color : undefined }}
+                    >
+                      <Icon className="h-5 w-5 text-brand-glow" />
+                    </div>
+                    <div className="min-w-0 w-full">
+                      <p className="truncate text-sm font-semibold group-hover:text-brand-glow">
+                        {i.name}
+                      </p>
+                      <p className="mt-0.5 text-[10px] text-emerald-400">Open dashboard →</p>
+                    </div>
+                  </button>
                 );
               })}
           </div>

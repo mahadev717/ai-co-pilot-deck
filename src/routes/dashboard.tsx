@@ -77,6 +77,7 @@ function DashboardLayout() {
       links: [
         { label: "Integrations", href: "/dashboard/integrations", icon: Network },
         { label: "GitHub Hub", href: "/dashboard/integrations/github", icon: Github },
+        { label: "Stripe", href: "/dashboard/integrations/stripe", icon: DollarSign },
       ],
     },
   ];

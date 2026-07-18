@@ -3,29 +3,52 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
-import { runAgentWebSearch, getAgentSearchBaseUrl, type SearchResponse } from "./agent-search";
+import {
+  runAgentWebSearch,
+  getAgentSearchBaseUrl,
+  isAgentSearchLiveEnabled,
+  type SearchResponse,
+} from "./agent-search";
 
 export const checkAgentSearch = createServerFn({ method: "GET" }).handler(async () => {
+  // Demo mode: dummy AgentSearch is always "online"
+  if (!isAgentSearchLiveEnabled()) {
+    return {
+      ok: true as const,
+      url: "demo://agent-search",
+      status: "demo" as const,
+      provider: "dummy" as const,
+      hint: "Using curated dummy results. Set VITE_AGENT_SEARCH_LIVE=true to use Docker AgentSearch.",
+    };
+  }
+
   const base = getAgentSearchBaseUrl();
   try {
     const res = await fetch(`${base}/health`, {
       signal: AbortSignal.timeout(3000),
     });
-    // Some builds use / or /engines as health
     if (res.ok) {
-      return { ok: true as const, url: base, status: "online" as const };
+      return { ok: true as const, url: base, status: "online" as const, provider: "agent-search" as const };
     }
     const engines = await fetch(`${base}/engines`, { signal: AbortSignal.timeout(3000) });
     if (engines.ok) {
-      return { ok: true as const, url: base, status: "online" as const };
+      return { ok: true as const, url: base, status: "online" as const, provider: "agent-search" as const };
     }
-    return { ok: false as const, url: base, status: "offline" as const, http: res.status };
+    return {
+      ok: true as const,
+      url: base,
+      status: "demo" as const,
+      provider: "dummy" as const,
+      http: res.status,
+      hint: "Live AgentSearch offline — using dummy results",
+    };
   } catch {
     return {
-      ok: false as const,
+      ok: true as const,
       url: base,
-      status: "offline" as const,
-      hint: "Start with: docker compose -f docker-compose.agent-search.yml up -d",
+      status: "demo" as const,
+      provider: "dummy" as const,
+      hint: "Live AgentSearch offline — using dummy results. Start with: docker compose -f docker-compose.agent-search.yml up -d",
     };
   }
 });

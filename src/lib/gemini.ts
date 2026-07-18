@@ -84,7 +84,7 @@ ${ctx.githubSummary ? `\n## GitHub Hub\n${ctx.githubSummary}\n` : ""}
 ${disconnected.length > 0 ? disconnected.map((n) => `• ${n}`).join("\n") : "All integrations connected!"}
 ${
   ctx.webSearch && ctx.webSearch.results.length > 0
-    ? `\n## Live Web Search (${ctx.webSearch.provider}) — "${ctx.webSearch.query}"\n${ctx.webSearch.results
+    ? `\n## ${ctx.webSearch.provider === "dummy" ? "Demo Web Search" : `Live Web Search (${ctx.webSearch.provider})`} — "${ctx.webSearch.query}"\n${ctx.webSearch.results
         .map((r, i) => `${i + 1}. ${r.title}\n   ${r.url}\n   ${r.snippet}`)
         .join("\n")}\n\nUse these search results when answering. Cite URLs when you reference them.`
     : ""

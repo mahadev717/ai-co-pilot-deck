@@ -69,16 +69,21 @@ function EmployeeAuthPage() {
     setEmail("employee@copilot.ai");
     setPassword("demo1234");
     setName("Alex Employee");
-    if (isAuthenticated && user?.role !== "employee") {
-      await logout();
+    try {
+      if (isAuthenticated && user?.role !== "employee") {
+        await logout();
+      }
+      const result = await enterPresentationDemo("employee");
+      if (!result.ok) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+      window.location.assign("/employee");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Demo login failed");
+      setLoading(false);
     }
-    const result = await enterPresentationDemo("employee");
-    setLoading(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    navigate({ to: "/employee" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

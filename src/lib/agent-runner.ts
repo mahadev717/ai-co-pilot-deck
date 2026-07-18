@@ -281,8 +281,10 @@ export async function runAgentCycle(
       try {
         const search = await runAgentWebSearch(q, 4);
         if (search.ok && search.results.length) {
+          const label =
+            search.provider === "dummy" ? "Demo web signals" : "Live web signals";
           searchBlock =
-            "\n## Live web signals\n" +
+            `\n## ${label}\n` +
             search.results
               .map((r, i) => `${i + 1}. ${r.title} — ${r.url}\n   ${r.snippet}`)
               .join("\n");

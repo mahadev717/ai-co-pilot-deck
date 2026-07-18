@@ -1,3 +1,5 @@
+import { getIntegrationInsight, INTEGRATION_INSIGHTS } from "./integration-demo";
+
 /**
  * Startup Copilot OS — Smart Mock AI
  *
@@ -302,8 +304,58 @@ Want me to proceed with a draft?`;
 If you resolve items 1–3 this week, your Business Health Score should move from **${ctx.businessHealth}** → **${Math.min(100, ctx.businessHealth + 12)}** by next week. 📈`;
   }
 
+  // ── Per-tool explain (Stripe, GitHub, Slack, …) ─────────────────
+  {
+    const toolIds = Object.keys(INTEGRATION_INSIGHTS);
+    const hitId = toolIds.find((id) => {
+      const name = (ctx.integrations.find((i) => i.id === id)?.name ?? id).toLowerCase();
+      return (
+        q.includes(` ${id} `) ||
+        q.includes(id) ||
+        q.includes(name) ||
+        (name.length > 4 && q.includes(name.split(" ")[0]!))
+      );
+    });
+    if (
+      hitId &&
+      includes(
+        "explain",
+        "tell",
+        "about",
+        "analyze",
+        "dashboard",
+        "meaning",
+        "saying",
+        "brief",
+        "what is",
+        "how's",
+        "how is",
+      )
+    ) {
+      const insight = getIntegrationInsight(hitId);
+      const label = ctx.integrations.find((i) => i.id === hitId)?.name ?? hitId;
+      const connected = has(hitId);
+      return `## ${label} — AI explanation
+
+${connected ? "✅ Connected to your workspace." : "⚠️ Using presentation intelligence for this demo."}
+
+${insight.summary}
+
+**Key metrics**
+${insight.metrics.map((m) => `- **${m.label}:** ${m.value}${m.trend ? ` (${m.trend})` : ""}`).join("\n")}
+
+**What I'm seeing**
+${insight.findings.map((f) => `- ${f}`).join("\n")}
+
+**Top actions**
+${insight.recommendations.map((r, i) => `${i + 1}. ${r}`).join("\n")}
+
+Open **Integrations → ${label}** for the full dashboard.`;
+    }
+  }
+
   // ── Integrations / Connected / Connect ──────────────────────────
-  if (includes("integrat", "connect", "link", "tool", "setup")) {
+  if (includes("integrat", "connect", "link", "tool", "setup", "all connected", "summarize all")) {
     const remaining = ctx.integrations
       .filter((i) => !i.connected)
       .map((i) => i.name);

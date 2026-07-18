@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useAppState } from "@/hooks/use-app-state";
 import { getIntegrationInsight, type DemoFile } from "@/lib/integration-demo";
 import {
@@ -24,6 +24,9 @@ import {
   Lightbulb,
   Activity,
   MessageSquare,
+  Bot,
+  CreditCard,
+  ArrowRight,
 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -33,12 +36,102 @@ function TrendIcon({ trend }: { trend?: "up" | "down" | "flat" }) {
   return <Minus className="h-3 w-3 text-muted-foreground" />;
 }
 
-function GitHubHub({
-  basePath,
-  sendChatMessage,
+function buildBotBrief(name: string, insight: ReturnType<typeof getIntegrationInsight>) {
+  return `## ${name} — plain-English brief
+
+${insight.summary}
+
+**What the numbers mean**
+${insight.metrics.map((m) => `- **${m.label}:** ${m.value}`).join("\n")}
+
+**What I'm seeing**
+${insight.findings.map((f) => `- ${f}`).join("\n")}
+
+**What you should do next**
+${insight.recommendations.map((r, i) => `${i + 1}. ${r}`).join("\n")}
+
+Ask me anything else about ${name} — billing risk, trends, or next actions.`;
+}
+
+function StripeDashboard({
+  onAskAi,
 }: {
-  basePath: "/dashboard" | "/employee";
-  sendChatMessage: (text: string) => void;
+  onAskAi: (prompt: string) => void;
+}) {
+  const insight = getIntegrationInsight("stripe");
+  const charges = [
+    { id: "ch_1", customer: "Acme Corp", amount: "$12,400", status: "succeeded" },
+    { id: "ch_2", customer: "Orbit Labs", amount: "$2,890", status: "succeeded" },
+    { id: "ch_3", customer: "Contoso", amount: "$2,100", status: "past_due" },
+    { id: "ch_4", customer: "Brightly", amount: "$2,700", status: "past_due" },
+    { id: "ch_5", customer: "NovaTech", amount: "$4,200", status: "succeeded" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <CreditCard className="h-4 w-4 text-brand-glow" />
+          Stripe revenue dashboard
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            onAskAi(
+              "Explain our Stripe dashboard: MRR, past-due invoices, expansion vs churn, and what I should do today.",
+            )
+          }
+          className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1.5 text-xs text-brand-glow"
+        >
+          <Bot className="h-3.5 w-3.5" /> Ask AI to explain Stripe
+        </button>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {insight.metrics.map((m) => (
+          <div key={m.label} className="glass rounded-2xl p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] uppercase text-muted-foreground">{m.label}</p>
+              <TrendIcon trend={m.trend} />
+            </div>
+            <p className="mt-1 font-display text-2xl font-semibold">{m.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-border/60">
+        <div className="border-b border-border/50 bg-white/5 px-4 py-2 text-xs font-semibold">
+          Recent charges & invoices
+        </div>
+        <div className="divide-y divide-border/40">
+          {charges.map((c) => (
+            <div key={c.id} className="flex items-center justify-between px-4 py-3 text-sm">
+              <div>
+                <p className="font-medium">{c.customer}</p>
+                <p className="text-[10px] text-muted-foreground">{c.id}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold">{c.amount}</p>
+                <p
+                  className={`text-[10px] ${
+                    c.status === "succeeded" ? "text-emerald-400" : "text-amber-400"
+                  }`}
+                >
+                  {c.status}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GitHubHub({
+  onAskAi,
+}: {
+  onAskAi: (prompt: string) => void;
 }) {
   const { liveGitHub, getIntegrationCredentials } = useAppState();
   const bundle = liveGitHub?.repos?.length
@@ -73,20 +166,18 @@ function GitHubHub({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm font-medium">
           <Github className="h-4 w-4 text-brand-glow" />
-          <span className="font-medium">
-            GitHub Hub · {bundle.mode === "live" ? "Live API" : "Presentation demo"}
-          </span>
+          GitHub Hub · {bundle.mode === "live" ? "Live API" : "Presentation demo"}
         </div>
         <button
           type="button"
           onClick={() =>
-            sendChatMessage(
+            onAskAi(
               "Analyze our GitHub repos for security risks, review bottlenecks, and what we should ship this week.",
             )
           }
-          className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1.5 text-xs text-brand-glow hover:bg-brand/20"
+          className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1.5 text-xs text-brand-glow"
         >
           <Sparkles className="h-3.5 w-3.5" /> Ask AI to analyze GitHub
         </button>
@@ -99,7 +190,7 @@ function GitHubHub({
           { label: "Repos", value: repos.length },
         ].map((m) => (
           <div key={m.label} className="glass rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{m.label}</p>
+            <p className="text-[10px] uppercase text-muted-foreground">{m.label}</p>
             <p className="mt-1 font-display text-2xl font-semibold">{m.value}</p>
           </div>
         ))}
@@ -124,9 +215,7 @@ function GitHubHub({
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-medium">{repo.fullName}</p>
-                  {repo.private ? (
-                    <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  ) : null}
+                  {repo.private ? <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : null}
                 </div>
                 <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">
                   {repo.description}
@@ -141,7 +230,6 @@ function GitHubHub({
                   <span className="inline-flex items-center gap-1">
                     <GitBranch className="h-3 w-3" /> {repo.defaultBranch}
                   </span>
-                  <span>{repo.openIssues} issues</span>
                 </div>
               </button>
             ))}
@@ -169,11 +257,7 @@ function GitHubHub({
               </button>
             ))}
           </div>
-
-          {loadingFile && (
-            <p className="text-xs text-muted-foreground">Loading file…</p>
-          )}
-
+          {loadingFile && <p className="text-xs text-muted-foreground">Loading file…</p>}
           {activeFile && (
             <div className="overflow-hidden rounded-2xl border border-border/60">
               <div className="flex items-center justify-between border-b border-border/50 bg-white/5 px-4 py-2">
@@ -197,43 +281,20 @@ function GitHubHub({
                     </li>
                   ))}
                 </ul>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Link
-                    to={`${basePath}/chat` as "/dashboard/chat"}
-                    className="inline-flex items-center gap-1 text-[11px] text-brand-glow hover:underline"
-                  >
-                    <MessageSquare className="h-3 w-3" /> Discuss in AI chat
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      sendChatMessage(
-                        `Explain the risks and next actions for ${activeFile.path} in ${selectedRepo}. Analysis notes: ${activeFile.analysis.join("; ")}`,
-                      )
-                    }
-                    className="text-[11px] text-muted-foreground hover:text-foreground"
-                  >
-                    Send this file to AI →
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onAskAi(
+                      `Explain the risks and next actions for ${activeFile.path} in ${selectedRepo}. Notes: ${activeFile.analysis.join("; ")}`,
+                    )
+                  }
+                  className="text-[11px] text-brand-glow hover:underline"
+                >
+                  Send this file to AI chat →
+                </button>
               </div>
             </div>
           )}
-
-          <div className="glass rounded-2xl p-4">
-            <p className="mb-3 text-xs font-semibold">Recent activity</p>
-            <ul className="space-y-2">
-              {(bundle.recentActivity ?? []).map((a, i) => (
-                <li key={`${a.text}-${i}`} className="flex gap-2 text-[12px] text-muted-foreground">
-                  <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-glow" />
-                  <span>
-                    <span className="text-foreground/90">{a.text}</span>
-                    <span className="ml-2 text-[10px] opacity-70">{a.time}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
       </div>
     </div>
@@ -247,58 +308,63 @@ export function IntegrationDetailPanel({
   integrationId: string;
   basePath: "/dashboard" | "/employee";
 }) {
-  const { integrations, connectIntegration, liveGitHub, sendChatMessage } = useAppState();
+  const navigate = useNavigate();
+  const { integrations, sendChatMessage } = useAppState();
   const item = integrations.find((i) => i.id === integrationId);
   const insight = useMemo(() => getIntegrationInsight(integrationId), [integrationId]);
-  const [connecting, setConnecting] = useState(false);
+  const displayName = item?.name ?? integrationId;
+
+  const askAi = (prompt: string) => {
+    sendChatMessage(prompt);
+    if (basePath === "/employee") {
+      void navigate({ to: "/employee/chat" });
+    } else {
+      void navigate({ to: "/dashboard/chat" });
+    }
+  };
+
+  const listTo = basePath === "/employee" ? "/employee/integrations" : "/dashboard/integrations";
 
   if (!item) {
     return (
       <div className="space-y-4">
-        <Link to={`${basePath}/integrations`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to={listTo}
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to integrations
         </Link>
-        <p className="text-sm text-muted-foreground">Integration not found.</p>
+        <p className="text-sm text-muted-foreground">
+          Unknown integration “{integrationId}”. Pick a tool from the integrations list.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Tip: use <strong>Enter as Demo Admin</strong> on Admin Login so all tools are ready.
+        </p>
       </div>
     );
   }
 
-  const handleConnect = async () => {
-    setConnecting(true);
-    try {
-      await connectIntegration(item.id, {});
-    } finally {
-      setConnecting(false);
-    }
-  };
+  const botBrief = buildBotBrief(displayName, insight);
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link
-            to={`${basePath}/integrations`}
+            to={listTo}
             className="mb-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> All integrations
           </Link>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">{item.name}</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            {displayName} dashboard
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{insight.summary}</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {item.connected ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Connected
-              </span>
-            ) : (
-              <button
-                type="button"
-                disabled={connecting}
-                onClick={() => void handleConnect()}
-                className="rounded-full gradient-brand-bg px-3 py-1.5 text-[11px] font-medium text-primary-foreground disabled:opacity-50"
-              >
-                {connecting ? "Connecting…" : "Connect for presentation"}
-              </button>
-            )}
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {item.connected ? "Connected" : "Preview mode"}
+            </span>
             <span className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-muted-foreground">
               Health {insight.healthScore}/100
             </span>
@@ -310,21 +376,63 @@ export function IntegrationDetailPanel({
         <button
           type="button"
           onClick={() =>
-            sendChatMessage(
-              `Explain what ${item.name} is telling us right now and the top 3 actions I should take.`,
+            askAi(
+              `Explain what ${displayName} is telling us right now and the top 3 actions I should take.`,
             )
           }
-          className="inline-flex items-center gap-1.5 self-start rounded-xl border border-border bg-white/5 px-3 py-2 text-xs hover:bg-white/10"
+          className="inline-flex items-center gap-1.5 self-start rounded-xl gradient-brand-bg px-4 py-2.5 text-xs font-medium text-primary-foreground"
         >
-          <MessageSquare className="h-3.5 w-3.5" /> Ask AI about this tool
+          <MessageSquare className="h-3.5 w-3.5" /> Open AI chat & explain
+          <ArrowRight className="h-3.5 w-3.5" />
         </button>
       </div>
 
-      {!item.connected && (
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-100/90">
-          Connect this integration to unlock the full intelligence view (works with dummy presentation data — no API keys required).
+      {/* Always-visible bot explanation on the dashboard itself */}
+      <div className="glass-strong rounded-3xl border border-brand/20 p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl gradient-brand-bg">
+            <Bot className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold">AI Co-founder explanation</p>
+            <p className="text-[10px] text-muted-foreground">
+              Plain English — what this tool means for your business
+            </p>
+          </div>
         </div>
-      )}
+        <div className="space-y-3 text-sm leading-relaxed text-foreground/90">
+          <p>{insight.summary}</p>
+          <div>
+            <p className="mb-1 text-xs font-semibold text-amber-300">What I&apos;m seeing</p>
+            <ul className="space-y-1">
+              {insight.findings.map((f) => (
+                <li key={f} className="flex gap-2 text-muted-foreground">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="mb-1 text-xs font-semibold text-brand-glow">What you should do</p>
+            <ul className="space-y-1">
+              {insight.recommendations.map((r) => (
+                <li key={r} className="flex gap-2 text-muted-foreground">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-glow" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => askAi(botBrief)}
+          className="mt-4 text-xs text-brand-glow hover:underline"
+        >
+          Continue this explanation in AI chat (text + voice) →
+        </button>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {insight.metrics.map((m) => (
@@ -343,54 +451,53 @@ export function IntegrationDetailPanel({
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="glass rounded-2xl p-5">
-          <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
-            <AlertTriangle className="h-4 w-4 text-amber-400" /> Findings
-          </p>
-          <ul className="space-y-2">
-            {insight.findings.map((f) => (
-              <li key={f} className="flex gap-2 text-sm text-muted-foreground">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
-                {f}
-              </li>
-            ))}
-          </ul>
+      {integrationId === "stripe" && <StripeDashboard onAskAi={askAi} />}
+      {integrationId === "github" && <GitHubHub onAskAi={askAi} />}
+
+      {integrationId !== "stripe" && integrationId !== "github" && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="glass rounded-2xl p-5">
+            <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
+              <AlertTriangle className="h-4 w-4 text-amber-400" /> Findings
+            </p>
+            <ul className="space-y-2">
+              {insight.findings.map((f) => (
+                <li key={f} className="flex gap-2 text-sm text-muted-foreground">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="glass rounded-2xl p-5">
+            <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
+              <Lightbulb className="h-4 w-4 text-brand-glow" /> Recommendations
+            </p>
+            <ul className="space-y-2">
+              {insight.recommendations.map((r) => (
+                <li key={r} className="flex gap-2 text-sm text-muted-foreground">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-glow" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="glass rounded-2xl p-5">
-          <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
-            <Lightbulb className="h-4 w-4 text-brand-glow" /> Recommendations
-          </p>
-          <ul className="space-y-2">
-            {insight.recommendations.map((r) => (
-              <li key={r} className="flex gap-2 text-sm text-muted-foreground">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-glow" />
-                {r}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      )}
 
       <div className="glass rounded-2xl p-5">
-        <p className="mb-3 text-sm font-semibold">{insight.headline}</p>
+        <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
+          <Activity className="h-4 w-4 text-brand-glow" /> {insight.headline} · live activity
+        </p>
         <ul className="space-y-2">
           {insight.timeline.map((t) => (
             <li key={`${t.time}-${t.text}`} className="flex gap-3 text-sm">
-              <span className="w-24 shrink-0 text-[11px] text-muted-foreground">{t.time}</span>
+              <span className="w-28 shrink-0 text-[11px] text-muted-foreground">{t.time}</span>
               <span className="text-muted-foreground">{t.text}</span>
             </li>
           ))}
         </ul>
       </div>
-
-      {integrationId === "github" && item.connected && (
-        <GitHubHub basePath={basePath} sendChatMessage={sendChatMessage} />
-      )}
-
-      {integrationId === "github" && !item.connected && liveGitHub && (
-        <p className="text-xs text-muted-foreground">Connect GitHub to open the full repos & code hub.</p>
-      )}
     </div>
   );
 }

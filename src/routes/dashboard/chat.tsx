@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAppState } from "../../hooks/use-app-state";
 import { activeEngine } from "@/lib/gemini";
+import { isAgentSearchLiveEnabled } from "@/lib/agent-search";
 import { checkAgentSearch } from "@/lib/agent-search-api";
 import {
   Send,
@@ -161,7 +162,7 @@ export function AIFounderChat() {
         ? "Gemini 2.0 Flash — Live"
         : "Smart Mock AI — Demo Mode";
   const engineLive = engine !== "mock";
-  const [searchOnline, setSearchOnline] = useState<boolean | null>(null);
+  const [searchMode, setSearchMode] = useState<"live" | "demo" | null>(null);
 
   useEffect(() => {
     setVoiceSupported(Boolean(getSpeechRecognition()) || typeof window !== "undefined");
@@ -172,9 +173,14 @@ export function AIFounderChat() {
   }, [chatHistory, isTyping]);
 
   useEffect(() => {
+    // Demo AgentSearch is the default — skip server health check to avoid boot failures
+    if (!isAgentSearchLiveEnabled()) {
+      setSearchMode("demo");
+      return;
+    }
     void checkAgentSearch()
-      .then((r) => setSearchOnline(r.ok))
-      .catch(() => setSearchOnline(false));
+      .then((r) => setSearchMode(r.status === "online" ? "live" : "demo"))
+      .catch(() => setSearchMode("demo"));
   }, []);
 
   // Speak newest assistant reply when voice-out is on
@@ -236,11 +242,11 @@ export function AIFounderChat() {
 
   const quickPrompts = [
     "What's our business health?",
+    "Explain Stripe dashboard",
     "Analyze connected GitHub repos",
-    "Explain Stripe and churn risk",
-    "What should I focus on today?",
     "Summarize all connected integrations",
-    "Search latest AI startup funding news",
+    "What should I focus on today?",
+    "Explain Slack and team blockers",
   ];
 
   return (
@@ -268,18 +274,18 @@ export function AIFounderChat() {
                 <Globe className="h-3 w-3" />
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
-                    searchOnline === null
+                    searchMode === null
                       ? "bg-muted-foreground"
-                      : searchOnline
+                      : searchMode === "live"
                         ? "bg-emerald-400"
-                        : "bg-yellow-400"
+                        : "bg-sky-400"
                   }`}
                 />
-                {searchOnline === null
+                {searchMode === null
                   ? "Search…"
-                  : searchOnline
+                  : searchMode === "live"
                     ? "AgentSearch live"
-                    : "Search fallback (DDG)"}
+                    : "Demo AgentSearch"}
               </span>
             </p>
           </div>

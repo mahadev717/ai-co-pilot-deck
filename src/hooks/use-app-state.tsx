@@ -579,20 +579,35 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const authAccountsWereReset =
     typeof window !== "undefined" ? applyPendingAuthAccountsReset() : false;
 
+  const isPresentationDemo =
+    typeof window !== "undefined" && storage.get("presentation_demo", false) === true;
+
   const [user, setUser] = useState<AppUser | null>(() => {
-    if (authAccountsWereReset || isSupabaseConfigured) return null;
-    const saved = storage.get<AppUser | null>("user", null);
-    if (!saved) return null;
-    return {
-      ...saved,
-      role: saved.role ?? "founder",
-      status: saved.status ?? "online",
-    };
+    if (authAccountsWereReset) return null;
+    // Presentation demo always restores from local storage (even when Supabase is configured)
+    if (isPresentationDemo || !isSupabaseConfigured) {
+      const saved = storage.get<AppUser | null>("user", null);
+      if (!saved) return null;
+      return {
+        ...saved,
+        role: saved.role ?? "founder",
+        status: saved.status ?? "online",
+      };
+    }
+    return null;
   });
   const [userId, setUserId] = useState<string | null>(null);
-  const [authReady, setAuthReady] = useState(!isSupabaseConfigured);
+  const [authReady, setAuthReady] = useState(
+    !isSupabaseConfigured || isPresentationDemo,
+  );
 
   const [integrations, setIntegrations] = useState<Integration[]>(() => {
+    const demoUser = storage.get<AppUser | null>("user", null);
+    if (isPresentationDemo && demoUser?.email) {
+      return mergeIntegrations(
+        storage.get(localIntegrationsKey(demoUser.email), DEFAULT_INTEGRATIONS),
+      );
+    }
     if (isSupabaseConfigured) {
       return mergeIntegrations(storage.get("integrations_v2", DEFAULT_INTEGRATIONS));
     }
@@ -605,6 +620,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return mergeIntegrations(storage.get("integrations_v2", DEFAULT_INTEGRATIONS));
   });
   const [integrationCreds, setIntegrationCreds] = useState<Record<string, Record<string, string>>>(() => {
+    if (isPresentationDemo) {
+      const demoUser = storage.get<AppUser | null>("user", null);
+      if (demoUser?.email) return storage.get(localCredsKey(demoUser.email), {});
+      return {};
+    }
     if (isSupabaseConfigured) return {};
     const localUser = storage.get<AppUser | null>("user", null);
     if (localUser?.email) return storage.get(localCredsKey(localUser.email), {});
@@ -667,7 +687,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => { userRef.current = user; }, [user]);
 
   // Always mirror to localStorage (fast offline cache)
-  useEffect(() => { storage.set("user", user); }, [user]);
+  // Never wipe a presentation demo session with a null write on boot
+  useEffect(() => {
+    if (user === null && storage.get("presentation_demo", false)) return;
+    storage.set("user", user);
+  }, [user]);
   useEffect(() => { storage.set("integrations_v2", integrations); }, [integrations]);
   useEffect(() => {
     if (!user?.email) return;
@@ -844,9 +868,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setTimeout(() => { skipCloudSave.current = false; }, 100);
   }
 
-  // Restore Supabase session on boot
+  // Restore session on boot
   useEffect(() => {
-    // Presentation demo uses a local session and skips cloud restore
+    // Presentation demo — local only, never hydrate Supabase over it
     if (storage.get("presentation_demo", false)) {
       const saved = storage.get<AppUser | null>("user", null);
       if (saved) {
@@ -855,24 +879,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           role: saved.role ?? "founder",
           status: saved.status ?? "online",
         });
-        setIntegrations(
-          mergeIntegrations(
-            storage.get(localIntegrationsKey(saved.email), DEFAULT_INTEGRATIONS),
-          ),
+        const ints = mergeIntegrations(
+          storage.get(localIntegrationsKey(saved.email), DEFAULT_INTEGRATIONS),
         );
+        setIntegrations(ints);
         setIntegrationCreds(storage.get(localCredsKey(saved.email), {}));
         setLeaveRequests(storage.get(localLeavesKey(), DEFAULT_LEAVES));
-        if (saved.role !== "employee") {
-          // Rehydrate GitHub hub if already connected in demo
-          const ints = storage.get(
-            localIntegrationsKey(saved.email),
-            DEFAULT_INTEGRATIONS,
-          ) as Integration[];
-          if (ints.some((i) => i.id === "github" && i.connected)) {
-            setLiveGitHub(getPresentationGitHubData());
-          }
+        if (ints.some((i) => i.id === "github" && i.connected)) {
+          setLiveGitHub(getPresentationGitHubData());
         }
       }
+      setUserId(null);
+      skipCloudSave.current = true;
       setAuthReady(true);
       return;
     }
@@ -885,22 +903,33 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     let unsub = () => {};
 
     (async () => {
-      // Finish cloud email wipe if local reset just ran
       if (authAccountsWereReset) {
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut();
+        } catch {
+          /* ignore */
+        }
         setUser(null);
         setUserId(null);
         storage.remove("user");
-        await wipeAllAuthUsers();
+        try {
+          await wipeAllAuthUsers();
+        } catch {
+          /* ignore */
+        }
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user && !authAccountsWereReset) {
-        await hydrateFromSupabase(
-          session.user.id,
-          session.user.email ?? "",
-          session.user.user_metadata?.name as string | undefined,
-        );
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user && !authAccountsWereReset && !storage.get("presentation_demo", false)) {
+          await hydrateFromSupabase(
+            session.user.id,
+            session.user.email ?? "",
+            session.user.user_metadata?.name as string | undefined,
+          );
+        }
+      } catch (e) {
+        console.warn("Supabase session restore failed:", e);
       }
       setAuthReady(true);
     })();
@@ -1160,60 +1189,88 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   /** Local presentation session — bypasses Supabase so demos always work. */
   async function enterPresentationDemo(role: UserRole = "founder"): Promise<AuthResult> {
-    if (supabase) {
-      try {
-        await supabase.auth.signOut();
-      } catch {
-        /* ignore */
+    try {
+      // Flag first so any late Supabase SIGNED_OUT cannot wipe the demo user
+      storage.set("presentation_demo", true);
+      skipCloudSave.current = true;
+      setUserId(null);
+
+      if (supabase) {
+        try {
+          await supabase.auth.signOut();
+        } catch {
+          /* ignore */
+        }
       }
+
+      const email = role === "founder" ? "admin@copilot.ai" : "employee@copilot.ai";
+      const name = role === "founder" ? "Demo Admin" : "Alex Employee";
+      const password = "demo1234";
+
+      const registered = storage.get<
+        { email: string; name: string; password: string; role?: UserRole }[]
+      >("registered_users", []);
+      const existingIdx = registered.findIndex((u) => u.email.toLowerCase() === email.toLowerCase());
+      const nextUser = { email, name, password, role };
+      if (existingIdx >= 0) {
+        registered[existingIdx] = nextUser;
+        storage.set("registered_users", registered);
+      } else {
+        storage.set("registered_users", [...registered, nextUser]);
+      }
+
+      const appUser: AppUser = { email, name, role, status: "online" };
+      storage.set("user", appUser);
+      setUser(appUser);
+
+      if (role === "founder") {
+        const linked = DEFAULT_INTEGRATIONS.map((i) => ({
+          ...i,
+          connected: true,
+          syncing: false,
+          lastSynced: "Just now",
+          accountLabel: i.id === "github" ? "startup-copilot (demo)" : `${name} · demo`,
+        }));
+        setIntegrations(linked);
+        storage.set(localIntegrationsKey(email), linked);
+        storage.set("integrations_v2", linked);
+        setLiveGitHub(getPresentationGitHubData());
+        setLiveStripe({
+          connected: true,
+          revenue: 248910,
+          recentCharges: [
+            { id: "ch_demo_1", amount: 12400, currency: "usd", status: "succeeded" },
+            { id: "ch_demo_2", amount: 2890, currency: "usd", status: "succeeded" },
+          ],
+        });
+        setLeaveRequests(storage.get(localLeavesKey(), DEFAULT_LEAVES));
+        setNotifications((prev) => [
+          {
+            id: uid(),
+            title: "Demo Admin ready — all 20 integrations linked",
+            time: "Just now",
+            read: false,
+            type: "success",
+            source: "System",
+          },
+          ...prev.slice(0, 29),
+        ]);
+      } else {
+        setIntegrations(DEFAULT_INTEGRATIONS.map((i) => ({ ...i })));
+        setLiveGitHub(null);
+        setLiveStripe(null);
+      }
+
+      setIntegrationCreds({});
+      setAuthReady(true);
+      return { ok: true };
+    } catch (e) {
+      console.error("enterPresentationDemo failed:", e);
+      return {
+        ok: false,
+        error: e instanceof Error ? e.message : "Demo login failed. Refresh and try again.",
+      };
     }
-
-    const email = role === "founder" ? "admin@copilot.ai" : "employee@copilot.ai";
-    const name = role === "founder" ? "Demo Admin" : "Alex Employee";
-    const password = "demo1234";
-
-    const registered = storage.get<
-      { email: string; name: string; password: string; role?: UserRole }[]
-    >("registered_users", []);
-    const existingIdx = registered.findIndex((u) => u.email.toLowerCase() === email.toLowerCase());
-    const nextUser = { email, name, password, role };
-    if (existingIdx >= 0) {
-      registered[existingIdx] = nextUser;
-      storage.set("registered_users", registered);
-    } else {
-      storage.set("registered_users", [...registered, nextUser]);
-    }
-
-    storage.set("presentation_demo", true);
-    setUserId(null);
-    skipCloudSave.current = true;
-    setUser({ email, name, role, status: "online" });
-
-    // Seed presentation integrations as connected for Admin demos
-    if (role === "founder") {
-      const linked = DEFAULT_INTEGRATIONS.map((i) => ({
-        ...i,
-        connected: true,
-        syncing: false,
-        lastSynced: "Just now",
-        accountLabel: i.id === "github" ? "startup-copilot (demo)" : `${name} · demo`,
-      }));
-      setIntegrations(linked);
-      storage.set(localIntegrationsKey(email), linked);
-      setLiveGitHub(getPresentationGitHubData());
-      setLeaveRequests(storage.get(localLeavesKey(), DEFAULT_LEAVES));
-      addNotification({
-        title: "Demo Admin ready — all 20 integrations linked with presentation data",
-        type: "success",
-        source: "System",
-      });
-    } else {
-      setIntegrations(DEFAULT_INTEGRATIONS.map((i) => ({ ...i })));
-      setLiveGitHub(null);
-    }
-
-    setIntegrationCreds({});
-    return { ok: true };
   }
 
   async function resetAllAccounts(): Promise<{ ok: boolean; deleted: number; error?: string }> {
@@ -1311,14 +1368,35 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         setLiveGitHub(getPresentationGitHubData());
         detailsMsg = "linked — presentation GitHub hub (repos, code & analysis ready)";
       }
-    } else if (id === "stripe" && merged.secretKey) {
-      const data = await fetchRealStripeData(merged.secretKey);
-      if (data) {
-        setLiveStripe(data);
-        liveOk = true;
-        detailsMsg = `linked — live Stripe feed (${data.recentCharges.length} recent charges)`;
+    } else if (id === "stripe") {
+      if (merged.secretKey) {
+        const data = await fetchRealStripeData(merged.secretKey);
+        if (data) {
+          setLiveStripe(data);
+          liveOk = true;
+          detailsMsg = `linked — live Stripe feed (${data.recentCharges.length} recent charges)`;
+        } else {
+          setLiveStripe({
+            connected: true,
+            revenue: 248910,
+            recentCharges: [
+              { id: "ch_demo_1", amount: 12400, currency: "usd", status: "succeeded" },
+              { id: "ch_demo_2", amount: 2100, currency: "usd", status: "failed" },
+            ],
+          });
+          detailsMsg = "linked — Stripe dashboard ready (presentation data)";
+        }
       } else {
-        detailsMsg = "linked to account (live Stripe sync failed — using demo metrics)";
+        setLiveStripe({
+          connected: true,
+          revenue: 248910,
+          recentCharges: [
+            { id: "ch_demo_1", amount: 12400, currency: "usd", status: "succeeded" },
+            { id: "ch_demo_2", amount: 2890, currency: "usd", status: "succeeded" },
+            { id: "ch_demo_3", amount: 2100, currency: "usd", status: "failed" },
+          ],
+        });
+        detailsMsg = "linked — Stripe dashboard ready (presentation data)";
       }
     } else if (id === "slack" && merged.webhookUrl) {
       const ok = await sendLiveSlackNotification(

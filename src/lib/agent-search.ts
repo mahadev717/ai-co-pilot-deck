@@ -1,9 +1,12 @@
 /**
  * Startup Copilot OS — AgentSearch client
  *
- * Primary: brcrusoe72/agent-search on localhost:3939 (vendor/agent-search)
- * Fallback: DuckDuckGo Instant Answer API when AgentSearch is offline
+ * Default: Demo AgentSearch (dummy curated results) — no Docker required
+ * Optional live: brcrusoe72/agent-search on localhost:3939 when VITE_AGENT_SEARCH_LIVE=true
+ * Fallback chain when live enabled: AgentSearch → DuckDuckGo → Dummy
  */
+
+import { searchWithDummyAgentSearch } from "./agent-search-dummy";
 
 export type SearchHit = {
   title: string;
@@ -16,7 +19,7 @@ export type SearchHit = {
 export type SearchResponse = {
   ok: boolean;
   query: string;
-  provider: "agent-search" | "duckduckgo" | "none";
+  provider: "agent-search" | "duckduckgo" | "dummy" | "none";
   results: SearchHit[];
   error?: string;
 };
@@ -31,6 +34,11 @@ const AGENT_SEARCH_TOKEN =
   (typeof process !== "undefined" && process.env?.AGENT_SEARCH_TOKEN) ||
   (import.meta.env?.VITE_AGENT_SEARCH_TOKEN as string | undefined) ||
   "";
+
+/** Live Docker AgentSearch only when explicitly enabled (avoids ERR_CONNECTION_REFUSED in demos) */
+const LIVE_AGENT_SEARCH =
+  (typeof process !== "undefined" && process.env?.AGENT_SEARCH_LIVE === "true") ||
+  import.meta.env?.VITE_AGENT_SEARCH_LIVE === "true";
 
 /** Heuristic: should this chat turn trigger a live web search? */
 export function needsWebSearch(message: string): boolean {
@@ -69,11 +77,15 @@ function authHeaders(): HeadersInit {
   return headers;
 }
 
-/** Call local AgentSearch /search */
+/** Call local AgentSearch /search (only when live mode is on) */
 export async function searchWithAgentSearch(
   query: string,
   limit = 6,
 ): Promise<SearchResponse> {
+  if (!LIVE_AGENT_SEARCH) {
+    return searchWithDummyAgentSearch(query, limit);
+  }
+
   try {
     const url = `${AGENT_SEARCH_URL}/search?q=${encodeURIComponent(query)}&limit=${limit}`;
     const res = await fetch(url, {
@@ -90,7 +102,6 @@ export async function searchWithAgentSearch(
       };
     }
     const data = await res.json();
-    // AgentSearch may return { results: [...] } or a bare array
     const raw: unknown[] = Array.isArray(data)
       ? data
       : Array.isArray(data?.results)
@@ -99,13 +110,18 @@ export async function searchWithAgentSearch(
           ? data.items
           : [];
 
-    const results: SearchHit[] = raw.slice(0, limit).map((item: any) => ({
-      title: String(item.title || item.name || "Untitled"),
-      url: String(item.url || item.link || item.href || ""),
-      snippet: String(item.content || item.snippet || item.description || item.text || "").slice(0, 320),
-      score: typeof item.score === "number" ? item.score : undefined,
-      source: "agent-search",
-    })).filter((r) => r.url);
+    const results: SearchHit[] = raw
+      .slice(0, limit)
+      .map((item: any) => ({
+        title: String(item.title || item.name || "Untitled"),
+        url: String(item.url || item.link || item.href || ""),
+        snippet: String(
+          item.content || item.snippet || item.description || item.text || "",
+        ).slice(0, 320),
+        score: typeof item.score === "number" ? item.score : undefined,
+        source: "agent-search",
+      }))
+      .filter((r) => r.url);
 
     return { ok: true, query, provider: "agent-search", results };
   } catch (e) {
@@ -175,31 +191,41 @@ async function searchWithDuckDuckGo(query: string, limit = 5): Promise<SearchRes
   }
 }
 
-/** Prefer AgentSearch; fall back to DuckDuckGo */
+/**
+ * Prefer demo dummy search by default.
+ * If VITE_AGENT_SEARCH_LIVE=true: AgentSearch → DuckDuckGo → Dummy
+ */
 export async function runAgentWebSearch(query: string, limit = 6): Promise<SearchResponse> {
+  if (!LIVE_AGENT_SEARCH) {
+    return searchWithDummyAgentSearch(query, limit);
+  }
+
   const primary = await searchWithAgentSearch(query, limit);
   if (primary.ok && primary.results.length > 0) return primary;
 
   const fallback = await searchWithDuckDuckGo(query, limit);
   if (fallback.ok && fallback.results.length > 0) return fallback;
 
-  return {
-    ok: false,
-    query,
-    provider: "none",
-    results: [],
-    error: primary.error || fallback.error || "No search providers available",
-  };
+  // Always succeed for agents/chat demos
+  return searchWithDummyAgentSearch(query, limit);
 }
 
 export function formatSearchForPrompt(search: SearchResponse): string {
   if (!search.results.length) return "";
+  const label =
+    search.provider === "dummy"
+      ? "Demo Web Search"
+      : `Live Web Search (${search.provider})`;
   const lines = search.results.map(
     (r, i) => `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.snippet}`,
   );
-  return `## Live Web Search (${search.provider}) — query: "${search.query}"\n${lines.join("\n")}`;
+  return `## ${label} — query: "${search.query}"\n${lines.join("\n")}`;
 }
 
 export function getAgentSearchBaseUrl() {
   return AGENT_SEARCH_URL;
+}
+
+export function isAgentSearchLiveEnabled() {
+  return LIVE_AGENT_SEARCH;
 }
