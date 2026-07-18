@@ -120,11 +120,14 @@ function Nav() {
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <a href="/auth" className="text-sm text-muted-foreground hover:text-foreground">
+          <a
+            href="/signin"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+          >
             Sign in
           </a>
           <a
-            href="/auth"
+            href="/signin"
             className="inline-flex items-center gap-1.5 rounded-full gradient-brand-bg px-4 py-2 text-sm font-medium text-primary-foreground ring-glow transition-transform hover:scale-[1.03]"
           >
             Get Started <ArrowRight className="h-3.5 w-3.5" />
@@ -149,9 +152,17 @@ function Nav() {
             ))}
             <a
               href="/auth"
-              className="mt-2 inline-flex items-center justify-center rounded-full gradient-brand-bg px-4 py-2 text-sm font-medium text-primary-foreground"
+              className="mt-2 inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-sm font-medium"
+              onClick={() => setOpen(false)}
             >
-              Get Started
+              Admin Login
+            </a>
+            <a
+              href="/employee/auth"
+              className="inline-flex items-center justify-center rounded-full gradient-brand-bg px-4 py-2 text-sm font-medium text-primary-foreground"
+              onClick={() => setOpen(false)}
+            >
+              Employee Login
             </a>
           </div>
         </div>
@@ -409,7 +420,13 @@ function Hero() {
                 href="/auth"
                 className="inline-flex items-center gap-2 rounded-full gradient-brand-bg px-5 py-3 text-sm font-medium text-primary-foreground ring-glow transition-transform hover:scale-[1.03]"
               >
-                Get Started <ArrowRight className="h-4 w-4" />
+                Admin Login <ArrowRight className="h-4 w-4" />
+              </a>
+              <a
+                href="/employee/auth"
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
+              >
+                Employee Login
               </a>
               <a
                 href="#how"
@@ -947,7 +964,7 @@ function Pricing() {
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
                 <a
-                  href="/auth"
+                  href="/signin"
                   className={`mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium transition-transform hover:scale-[1.02] ${
                     p.highlight
                       ? "gradient-brand-bg text-primary-foreground"
@@ -1058,7 +1075,7 @@ function CTA() {
           </p>
           <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
-              href="/auth"
+              href="/signin"
               className="inline-flex items-center gap-2 rounded-full gradient-brand-bg px-5 py-3 text-sm font-medium text-primary-foreground ring-glow hover:scale-[1.03] transition-transform"
             >
               Get Started <ArrowRight className="h-4 w-4" />

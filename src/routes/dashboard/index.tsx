@@ -168,7 +168,7 @@ function DashboardOverview() {
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Score weight</span>
             <span className="text-foreground">
-              {integrations.filter((i) => i.connected).length} / 6 connected
+              {integrations.filter((i) => i.connected).length} / {integrations.length} connected
             </span>
           </div>
         </div>

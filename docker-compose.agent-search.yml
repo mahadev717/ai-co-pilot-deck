@@ -1,0 +1,46 @@
+# AgentSearch (brcrusoe72/agent-search) — local search API for the AI co-founder
+# Run from repo root after installing Docker Desktop:
+#   npm run agent-search:prepare
+#   npm run agent-search:up
+#
+# API: http://127.0.0.1:3939
+
+services:
+  searxng:
+    image: ${SEARXNG_IMAGE:-searxng/searxng:latest}
+    container_name: copilot-searxng
+    volumes:
+      - ./vendor/agent-search/searxng:/etc/searxng:rw
+    networks:
+      - agent-search
+    restart: unless-stopped
+    environment:
+      - SEARXNG_BASE_URL=http://searxng:8080/
+
+  api:
+    build:
+      context: ./vendor/agent-search
+    container_name: copilot-agent-search
+    ports:
+      - "127.0.0.1:3939:3939"
+    environment:
+      - SEARXNG_URL=http://searxng:8080
+      - CACHE_TTL=3600
+      - RATE_LIMIT=60
+      - ADAPTERS_DIR=/app/adapters
+      - AGENT_SEARCH_TOKEN=${AGENT_SEARCH_TOKEN:-}
+    depends_on:
+      - searxng
+    volumes:
+      - agent-search-data:/app/data
+      - ./vendor/agent-search/adapters:/app/adapters:ro
+    networks:
+      - agent-search
+    restart: unless-stopped
+
+networks:
+  agent-search:
+    driver: bridge
+
+volumes:
+  agent-search-data:

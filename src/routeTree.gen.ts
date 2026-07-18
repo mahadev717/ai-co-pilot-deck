@@ -9,14 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmployeeIndexRouteImport } from './routes/employee/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as EmployeeTeamRouteImport } from './routes/employee/team'
+import { Route as EmployeeLeavesRouteImport } from './routes/employee/leaves'
+import { Route as EmployeeIntegrationsRouteImport } from './routes/employee/integrations'
+import { Route as EmployeeChatRouteImport } from './routes/employee/chat'
+import { Route as EmployeeAuthRouteImport } from './routes/employee/auth'
+import { Route as EmployeeAgentsRouteImport } from './routes/employee/agents'
+import { Route as DashboardTeamRouteImport } from './routes/dashboard/team'
+import { Route as DashboardRevenueRouteImport } from './routes/dashboard/revenue'
+import { Route as DashboardLeavesRouteImport } from './routes/dashboard/leaves'
 import { Route as DashboardIntegrationsRouteImport } from './routes/dashboard/integrations'
+import { Route as DashboardCustomersRouteImport } from './routes/dashboard/customers'
 import { Route as DashboardChatRouteImport } from './routes/dashboard/chat'
 import { Route as DashboardAgentsRouteImport } from './routes/dashboard/agents'
+import { Route as EmployeeIntegrationsIdRouteImport } from './routes/employee/integrations.$id'
+import { Route as DashboardIntegrationsIdRouteImport } from './routes/dashboard/integrations.$id'
 
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeeRoute = EmployeeRouteImport.update({
+  id: '/employee',
+  path: '/employee',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -32,14 +57,69 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmployeeIndexRoute = EmployeeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EmployeeRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const EmployeeTeamRoute = EmployeeTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => EmployeeRoute,
+} as any)
+const EmployeeLeavesRoute = EmployeeLeavesRouteImport.update({
+  id: '/leaves',
+  path: '/leaves',
+  getParentRoute: () => EmployeeRoute,
+} as any)
+const EmployeeIntegrationsRoute = EmployeeIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => EmployeeRoute,
+} as any)
+const EmployeeChatRoute = EmployeeChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => EmployeeRoute,
+} as any)
+const EmployeeAuthRoute = EmployeeAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => EmployeeRoute,
+} as any)
+const EmployeeAgentsRoute = EmployeeAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => EmployeeRoute,
+} as any)
+const DashboardTeamRoute = DashboardTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardRevenueRoute = DashboardRevenueRouteImport.update({
+  id: '/revenue',
+  path: '/revenue',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardLeavesRoute = DashboardLeavesRouteImport.update({
+  id: '/leaves',
+  path: '/leaves',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardIntegrationsRoute = DashboardIntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCustomersRoute = DashboardCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardChatRoute = DashboardChatRouteImport.update({
@@ -52,33 +132,87 @@ const DashboardAgentsRoute = DashboardAgentsRouteImport.update({
   path: '/agents',
   getParentRoute: () => DashboardRoute,
 } as any)
+const EmployeeIntegrationsIdRoute = EmployeeIntegrationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => EmployeeIntegrationsRoute,
+} as any)
+const DashboardIntegrationsIdRoute = DashboardIntegrationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => DashboardIntegrationsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/employee': typeof EmployeeRouteWithChildren
+  '/signin': typeof SigninRoute
   '/dashboard/agents': typeof DashboardAgentsRoute
   '/dashboard/chat': typeof DashboardChatRoute
-  '/dashboard/integrations': typeof DashboardIntegrationsRoute
+  '/dashboard/customers': typeof DashboardCustomersRoute
+  '/dashboard/integrations': typeof DashboardIntegrationsRouteWithChildren
+  '/dashboard/leaves': typeof DashboardLeavesRoute
+  '/dashboard/revenue': typeof DashboardRevenueRoute
+  '/dashboard/team': typeof DashboardTeamRoute
+  '/employee/agents': typeof EmployeeAgentsRoute
+  '/employee/auth': typeof EmployeeAuthRoute
+  '/employee/chat': typeof EmployeeChatRoute
+  '/employee/integrations': typeof EmployeeIntegrationsRouteWithChildren
+  '/employee/leaves': typeof EmployeeLeavesRoute
+  '/employee/team': typeof EmployeeTeamRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/employee/': typeof EmployeeIndexRoute
+  '/dashboard/integrations/$id': typeof DashboardIntegrationsIdRoute
+  '/employee/integrations/$id': typeof EmployeeIntegrationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/signin': typeof SigninRoute
   '/dashboard/agents': typeof DashboardAgentsRoute
   '/dashboard/chat': typeof DashboardChatRoute
-  '/dashboard/integrations': typeof DashboardIntegrationsRoute
+  '/dashboard/customers': typeof DashboardCustomersRoute
+  '/dashboard/integrations': typeof DashboardIntegrationsRouteWithChildren
+  '/dashboard/leaves': typeof DashboardLeavesRoute
+  '/dashboard/revenue': typeof DashboardRevenueRoute
+  '/dashboard/team': typeof DashboardTeamRoute
+  '/employee/agents': typeof EmployeeAgentsRoute
+  '/employee/auth': typeof EmployeeAuthRoute
+  '/employee/chat': typeof EmployeeChatRoute
+  '/employee/integrations': typeof EmployeeIntegrationsRouteWithChildren
+  '/employee/leaves': typeof EmployeeLeavesRoute
+  '/employee/team': typeof EmployeeTeamRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/employee': typeof EmployeeIndexRoute
+  '/dashboard/integrations/$id': typeof DashboardIntegrationsIdRoute
+  '/employee/integrations/$id': typeof EmployeeIntegrationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/employee': typeof EmployeeRouteWithChildren
+  '/signin': typeof SigninRoute
   '/dashboard/agents': typeof DashboardAgentsRoute
   '/dashboard/chat': typeof DashboardChatRoute
-  '/dashboard/integrations': typeof DashboardIntegrationsRoute
+  '/dashboard/customers': typeof DashboardCustomersRoute
+  '/dashboard/integrations': typeof DashboardIntegrationsRouteWithChildren
+  '/dashboard/leaves': typeof DashboardLeavesRoute
+  '/dashboard/revenue': typeof DashboardRevenueRoute
+  '/dashboard/team': typeof DashboardTeamRoute
+  '/employee/agents': typeof EmployeeAgentsRoute
+  '/employee/auth': typeof EmployeeAuthRoute
+  '/employee/chat': typeof EmployeeChatRoute
+  '/employee/integrations': typeof EmployeeIntegrationsRouteWithChildren
+  '/employee/leaves': typeof EmployeeLeavesRoute
+  '/employee/team': typeof EmployeeTeamRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/employee/': typeof EmployeeIndexRoute
+  '/dashboard/integrations/$id': typeof DashboardIntegrationsIdRoute
+  '/employee/integrations/$id': typeof EmployeeIntegrationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,37 +220,97 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/employee'
+    | '/signin'
     | '/dashboard/agents'
     | '/dashboard/chat'
+    | '/dashboard/customers'
     | '/dashboard/integrations'
+    | '/dashboard/leaves'
+    | '/dashboard/revenue'
+    | '/dashboard/team'
+    | '/employee/agents'
+    | '/employee/auth'
+    | '/employee/chat'
+    | '/employee/integrations'
+    | '/employee/leaves'
+    | '/employee/team'
     | '/dashboard/'
+    | '/employee/'
+    | '/dashboard/integrations/$id'
+    | '/employee/integrations/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/signin'
     | '/dashboard/agents'
     | '/dashboard/chat'
+    | '/dashboard/customers'
     | '/dashboard/integrations'
+    | '/dashboard/leaves'
+    | '/dashboard/revenue'
+    | '/dashboard/team'
+    | '/employee/agents'
+    | '/employee/auth'
+    | '/employee/chat'
+    | '/employee/integrations'
+    | '/employee/leaves'
+    | '/employee/team'
     | '/dashboard'
+    | '/employee'
+    | '/dashboard/integrations/$id'
+    | '/employee/integrations/$id'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/employee'
+    | '/signin'
     | '/dashboard/agents'
     | '/dashboard/chat'
+    | '/dashboard/customers'
     | '/dashboard/integrations'
+    | '/dashboard/leaves'
+    | '/dashboard/revenue'
+    | '/dashboard/team'
+    | '/employee/agents'
+    | '/employee/auth'
+    | '/employee/chat'
+    | '/employee/integrations'
+    | '/employee/leaves'
+    | '/employee/team'
     | '/dashboard/'
+    | '/employee/'
+    | '/dashboard/integrations/$id'
+    | '/employee/integrations/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  EmployeeRoute: typeof EmployeeRouteWithChildren
+  SigninRoute: typeof SigninRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employee': {
+      id: '/employee'
+      path: '/employee'
+      fullPath: '/employee'
+      preLoaderRoute: typeof EmployeeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -138,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/employee/': {
+      id: '/employee/'
+      path: '/'
+      fullPath: '/employee/'
+      preLoaderRoute: typeof EmployeeIndexRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
@@ -145,11 +346,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/employee/team': {
+      id: '/employee/team'
+      path: '/team'
+      fullPath: '/employee/team'
+      preLoaderRoute: typeof EmployeeTeamRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
+    '/employee/leaves': {
+      id: '/employee/leaves'
+      path: '/leaves'
+      fullPath: '/employee/leaves'
+      preLoaderRoute: typeof EmployeeLeavesRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
+    '/employee/integrations': {
+      id: '/employee/integrations'
+      path: '/integrations'
+      fullPath: '/employee/integrations'
+      preLoaderRoute: typeof EmployeeIntegrationsRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
+    '/employee/chat': {
+      id: '/employee/chat'
+      path: '/chat'
+      fullPath: '/employee/chat'
+      preLoaderRoute: typeof EmployeeChatRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
+    '/employee/auth': {
+      id: '/employee/auth'
+      path: '/auth'
+      fullPath: '/employee/auth'
+      preLoaderRoute: typeof EmployeeAuthRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
+    '/employee/agents': {
+      id: '/employee/agents'
+      path: '/agents'
+      fullPath: '/employee/agents'
+      preLoaderRoute: typeof EmployeeAgentsRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
+    '/dashboard/team': {
+      id: '/dashboard/team'
+      path: '/team'
+      fullPath: '/dashboard/team'
+      preLoaderRoute: typeof DashboardTeamRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/revenue': {
+      id: '/dashboard/revenue'
+      path: '/revenue'
+      fullPath: '/dashboard/revenue'
+      preLoaderRoute: typeof DashboardRevenueRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/leaves': {
+      id: '/dashboard/leaves'
+      path: '/leaves'
+      fullPath: '/dashboard/leaves'
+      preLoaderRoute: typeof DashboardLeavesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/integrations': {
       id: '/dashboard/integrations'
       path: '/integrations'
       fullPath: '/dashboard/integrations'
       preLoaderRoute: typeof DashboardIntegrationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/customers': {
+      id: '/dashboard/customers'
+      path: '/customers'
+      fullPath: '/dashboard/customers'
+      preLoaderRoute: typeof DashboardCustomersRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/chat': {
@@ -166,20 +437,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/employee/integrations/$id': {
+      id: '/employee/integrations/$id'
+      path: '/$id'
+      fullPath: '/employee/integrations/$id'
+      preLoaderRoute: typeof EmployeeIntegrationsIdRouteImport
+      parentRoute: typeof EmployeeIntegrationsRoute
+    }
+    '/dashboard/integrations/$id': {
+      id: '/dashboard/integrations/$id'
+      path: '/$id'
+      fullPath: '/dashboard/integrations/$id'
+      preLoaderRoute: typeof DashboardIntegrationsIdRouteImport
+      parentRoute: typeof DashboardIntegrationsRoute
+    }
   }
 }
+
+interface DashboardIntegrationsRouteChildren {
+  DashboardIntegrationsIdRoute: typeof DashboardIntegrationsIdRoute
+}
+
+const DashboardIntegrationsRouteChildren: DashboardIntegrationsRouteChildren = {
+  DashboardIntegrationsIdRoute: DashboardIntegrationsIdRoute,
+}
+
+const DashboardIntegrationsRouteWithChildren =
+  DashboardIntegrationsRoute._addFileChildren(
+    DashboardIntegrationsRouteChildren,
+  )
 
 interface DashboardRouteChildren {
   DashboardAgentsRoute: typeof DashboardAgentsRoute
   DashboardChatRoute: typeof DashboardChatRoute
-  DashboardIntegrationsRoute: typeof DashboardIntegrationsRoute
+  DashboardCustomersRoute: typeof DashboardCustomersRoute
+  DashboardIntegrationsRoute: typeof DashboardIntegrationsRouteWithChildren
+  DashboardLeavesRoute: typeof DashboardLeavesRoute
+  DashboardRevenueRoute: typeof DashboardRevenueRoute
+  DashboardTeamRoute: typeof DashboardTeamRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAgentsRoute: DashboardAgentsRoute,
   DashboardChatRoute: DashboardChatRoute,
-  DashboardIntegrationsRoute: DashboardIntegrationsRoute,
+  DashboardCustomersRoute: DashboardCustomersRoute,
+  DashboardIntegrationsRoute: DashboardIntegrationsRouteWithChildren,
+  DashboardLeavesRoute: DashboardLeavesRoute,
+  DashboardRevenueRoute: DashboardRevenueRoute,
+  DashboardTeamRoute: DashboardTeamRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -187,11 +493,58 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface EmployeeIntegrationsRouteChildren {
+  EmployeeIntegrationsIdRoute: typeof EmployeeIntegrationsIdRoute
+}
+
+const EmployeeIntegrationsRouteChildren: EmployeeIntegrationsRouteChildren = {
+  EmployeeIntegrationsIdRoute: EmployeeIntegrationsIdRoute,
+}
+
+const EmployeeIntegrationsRouteWithChildren =
+  EmployeeIntegrationsRoute._addFileChildren(EmployeeIntegrationsRouteChildren)
+
+interface EmployeeRouteChildren {
+  EmployeeAgentsRoute: typeof EmployeeAgentsRoute
+  EmployeeAuthRoute: typeof EmployeeAuthRoute
+  EmployeeChatRoute: typeof EmployeeChatRoute
+  EmployeeIntegrationsRoute: typeof EmployeeIntegrationsRouteWithChildren
+  EmployeeLeavesRoute: typeof EmployeeLeavesRoute
+  EmployeeTeamRoute: typeof EmployeeTeamRoute
+  EmployeeIndexRoute: typeof EmployeeIndexRoute
+}
+
+const EmployeeRouteChildren: EmployeeRouteChildren = {
+  EmployeeAgentsRoute: EmployeeAgentsRoute,
+  EmployeeAuthRoute: EmployeeAuthRoute,
+  EmployeeChatRoute: EmployeeChatRoute,
+  EmployeeIntegrationsRoute: EmployeeIntegrationsRouteWithChildren,
+  EmployeeLeavesRoute: EmployeeLeavesRoute,
+  EmployeeTeamRoute: EmployeeTeamRoute,
+  EmployeeIndexRoute: EmployeeIndexRoute,
+}
+
+const EmployeeRouteWithChildren = EmployeeRoute._addFileChildren(
+  EmployeeRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  EmployeeRoute: EmployeeRouteWithChildren,
+  SigninRoute: SigninRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

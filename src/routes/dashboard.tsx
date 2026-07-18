@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAppState } from "../hooks/use-app-state";
+import { ProfileMenu } from "@/components/profile-menu";
 import {
   Sparkles,
   LayoutDashboard,
@@ -8,12 +9,14 @@ import {
   Network,
   Users,
   Bell,
-  LogOut,
   Menu,
   X,
-  Settings,
-  BrainCircuit,
+  DollarSign,
+  UserCheck,
+  Bot,
   Trash2,
+  CalendarDays,
+  Github,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -22,36 +25,62 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardLayout() {
-  const { isAuthenticated, user, logout, notifications, clearNotifications } = useAppState();
+  const { isAuthenticated, authReady, user, notifications, clearNotifications } = useAppState();
   const navigate = useNavigate();
   const routerState = useRouterState();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Auth Guard
+  // Auth Guard — wait for session restore before redirecting
   useEffect(() => {
+    if (!authReady) return;
     if (!isAuthenticated) {
       navigate({ to: "/auth" });
+      return;
     }
-  }, [isAuthenticated, navigate]);
+    if (user?.role === "employee") {
+      navigate({ to: "/employee" });
+    }
+  }, [isAuthenticated, authReady, user?.role, navigate]);
 
-  if (!isAuthenticated) {
+  if (!authReady || !isAuthenticated || user?.role === "employee") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
         <div className="flex flex-col items-center gap-3">
           <span className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <span>Verifying security context...</span>
+          <span>{authReady ? "Verifying security context..." : "Restoring session..."}</span>
         </div>
       </div>
     );
   }
 
-  const navLinks = [
-    { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-    { label: "AI Co-founder", href: "/dashboard/chat", icon: MessageSquare },
-    { label: "Integrations", href: "/dashboard/integrations", icon: Network },
-    { label: "AI Agents", href: "/dashboard/agents", icon: Users },
+  const navGroups = [
+    {
+      label: "Core",
+      links: [
+        { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+        { label: "AI Co-founder", href: "/dashboard/chat", icon: MessageSquare },
+      ],
+    },
+    {
+      label: "Intelligence",
+      links: [
+        { label: "Revenue", href: "/dashboard/revenue", icon: DollarSign },
+        { label: "Team Activity", href: "/dashboard/team", icon: Users },
+        { label: "Leave & Holidays", href: "/dashboard/leaves", icon: CalendarDays },
+        { label: "Customers", href: "/dashboard/customers", icon: UserCheck },
+        { label: "AI Agents", href: "/dashboard/agents", icon: Bot },
+      ],
+    },
+    {
+      label: "Connections",
+      links: [
+        { label: "Integrations", href: "/dashboard/integrations", icon: Network },
+        { label: "GitHub Hub", href: "/dashboard/integrations/github", icon: Github },
+      ],
+    },
   ];
+  const allNavLinks = navGroups.flatMap((g) => g.links);
 
   const currentPath = routerState.location.pathname;
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -104,25 +133,32 @@ function DashboardLayout() {
             </span>
           </Link>
 
-          {/* Nav links */}
-          <nav className="mt-6 flex-1 space-y-1.5">
-            {navLinks.map((link) => {
-              const active = currentPath === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                    active
-                      ? "gradient-brand-bg text-primary-foreground shadow-glow"
-                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
-                  }`}
-                >
-                  <link.icon className="h-4 w-4" />
-                  {link.label}
-                </Link>
-              );
-            })}
+          {/* Nav links grouped */}
+          <nav className="mt-4 flex-1 space-y-5 overflow-y-auto">
+            {navGroups.map((group) => (
+              <div key={group.label}>
+                <p className="mb-1.5 px-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60">{group.label}</p>
+                <div className="space-y-0.5">
+                  {group.links.map((link) => {
+                    const active = currentPath === link.href;
+                    return (
+                      <Link
+                        key={link.href}
+                        to={link.href as any}
+                        className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
+                          active
+                            ? "gradient-brand-bg text-primary-foreground shadow-glow"
+                            : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                        }`}
+                      >
+                        <link.icon className="h-4 w-4" />
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           {/* Notifications Trigger */}
@@ -144,28 +180,7 @@ function DashboardLayout() {
 
           {/* User profile / Logout */}
           <div className="border-t border-border pt-4">
-            <div className="flex items-center justify-between gap-2 px-2">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-2 font-medium text-sm text-primary-foreground">
-                  {user?.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
-                </div>
-                <div className="overflow-hidden">
-                  <div className="truncate text-sm font-medium">{user?.name}</div>
-                  <div className="truncate text-xs text-muted-foreground">{user?.email}</div>
-                </div>
-              </div>
-              <button
-                onClick={logout}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/15 hover:text-destructive transition-colors"
-                title="Logout"
-              >
-                <LogOut className="h-4.5 w-4.5" />
-              </button>
-            </div>
+            <ProfileMenu logoutTo="/signin" />
           </div>
         </aside>
 
@@ -201,15 +216,15 @@ function DashboardLayout() {
                   </button>
                 </div>
 
-                <nav className="mt-4 flex-1 space-y-1.5">
-                  {navLinks.map((link) => {
+                <nav className="mt-4 flex-1 space-y-0.5 overflow-y-auto">
+                  {allNavLinks.map((link) => {
                     const active = currentPath === link.href;
                     return (
                       <Link
                         key={link.href}
-                        to={link.href}
+                        to={link.href as any}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                        className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
                           active
                             ? "gradient-brand-bg text-primary-foreground"
                             : "text-muted-foreground hover:bg-white/5"
@@ -223,27 +238,7 @@ function DashboardLayout() {
                 </nav>
 
                 <div className="border-t border-border pt-4">
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-2 font-medium text-primary-foreground">
-                        {user?.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium">{user?.name}</div>
-                        <div className="text-xs text-muted-foreground">{user?.email}</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={logout}
-                      className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive"
-                    >
-                      <LogOut className="h-4.5 w-4.5" />
-                    </button>
-                  </div>
+                  <ProfileMenu logoutTo="/signin" />
                 </div>
               </motion.aside>
             </>
